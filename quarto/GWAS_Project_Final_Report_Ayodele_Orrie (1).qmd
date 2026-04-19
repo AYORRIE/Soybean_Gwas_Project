@@ -1,0 +1,400 @@
+---
+title: "Genetic architecture, heritability, and genomic prediction of yield, seed protein, and oil content in soybean using multi-environment field data"
+author:
+  - "Ayodele Amodu"
+  - "Orrie Feitsma"
+format:
+  html:
+    toc: true
+    toc-location: left
+execute:
+  echo: true
+  warning: false
+bibliography: references.bib
+---
+
+## Abstract
+
+*This section will summarize the study’s objectives, data sources, analytical framework, key findings, and overall significance. A full abstract will be added after the main analyses and results are finalized.*
+
+## Introduction
+
+Improving yield, seed protein, and oil content remain a central challenge in soybean breeding because these traits are economically critical yet genetically complex. Yield is highly polygenic and strongly influenced by environmental variation @Sharma2024, while protein and oil content often exhibit antagonistic genetic correlations @Diers2018, making simultaneous improvement difficult. Breeders must also contend with genotype × environment interactions (G×E), which cause genotypes to perform inconsistently across locations and years, reducing the reliability of selection decisions @Akram2016. Traditional phenotypic selection is further constrained by the cost and time required to generate multi-environment field data, as well as the limited ability to dissect the underlying genetic architecture of these traits.
+
+Although phenotypic selection alone is time consuming and not maximally effective, accurate phenotyping is crucial for understanding the heritability and variance components of traits and for obtaining accurate results from genomic inferences and predictions. Heritability refers to the ability of a trait to be passed down from parent to progeny or the portion of total phenotypic variance that can be attributed to genotype. An accurate understanding of heritability is crucial for estimating a population’s response to selection and the potential genetic gain that can be expected @Holland2003. A higher heritability suggests that selection is simpler, and the trait is likely only controlled by one or a few genes, while low heritability is typically associated with complex, polygenic traits. The variance components involved in phenotypic variance and heritability, such as dominance and additive variance, can further be parsed apart, and linear mixed models are typically used for this.
+
+Advances in high-density SNP genotyping (e.g., SoySNP50K) and mixed model statistical frameworks now enable more precise estimation of genetic effects, partitioning of G×E, and prediction of breeding values using genome-wide markers (Ravelombola et al., 2021; Zhang et al., 2016). The genomic data acquired by SNP genotyping can be used for various downstream applications that allow breeders to make both large-scale inferences and powerful predictions. For example, SNP data and phenotypic data can be collected from a diverse population and analyzed in a genome-wide association study (GWAS), which allows researchers to identify SNPs in regions of the genome that are significantly associated with a trait of interest @Clauw2025. Genotypic and phenotypic data can also be used for genomic selection (GS), which involves building and training a model to predict breeding values of individuals based on a score at each SNP @Escamilla2025.
+
+By integrating multi-environment phenotypic data with genomic information, this project aims to characterize the genetic architecture of yield, protein, and oil content, quantify their heritability, and evaluate the potential of genomic prediction to accelerate selection for improved seed quality and productivity in soybean. We will infer variance components and heritability using phenotypic data, identify SNPs associated with oil, protein, and yield using GWAS, and predict the performance of progeny from a subset of lines in this data using a GS model.
+
+
+### Data sources and type
+
+**Genotypic data.** Imputed genotypes of the 5,176 Nested Association Mapping (NAM) recombinant inbred lines (RILs), derived from 40 NAM parental genotypes and obtained using the SoySNP50K and SoyNAM6K assays, were used in this project. The SNP arrays were aligned to the Williams 82 reference genome assembly (Wm82.a2). The imputed genotype dataset is publicly available at [SoyBase](https://data.soybase.org/Glycine/max/diversity/Wm82.gnm2.div.Song_NAM_2021a/).
+
+**Phenotypic and metadata.** Phenotypic data and associated metadata were obtained from the USDA Soybean Nested Association Mapping (SoyNAM) project, which provides large‑scale field evaluations of soybean lines across multiple locations and years to study complex agronomic and seed composition traits. The SoyNAM project resources are available at [SoyBase Legacy](https://legacy.soybase.org/).
+
+### Data wrangling
+
+Phenotypic data were imported from the raw text file and cleaned prior to downstream analyses. Empty columns created by trailing delimiters were removed, and key agronomic traits (yield, protein, and oil) were converted to numeric format to ensure compatibility with statistical modeling. Basic structural checks were performed to confirm correct variable types and naming. Missing data patterns were quantified to assess trait completeness across environments, and descriptive summaries were generated to characterize the distribution and scale of each trait. These steps ensured that the phenotype dataset was properly formatted, internally consistent, and ready for exploratory analyses and mixed‑model variance component estimation.
+
+```{r}
+# Load phenotype data
+pheno_file <- "../raw_data/phenotypic_data.txt"
+pheno_raw <- read.table(pheno_file, header = TRUE)
+
+pheno_raw <- read.table(
+  pheno_file,
+  header = TRUE,
+  sep = "\t",
+  fill = TRUE,
+  quote = "",
+  comment.char = "",
+  stringsAsFactors = FALSE,
+  check.names = FALSE
+)
+
+# Remove empty columns created by trailing tabs
+pheno_raw <- pheno_raw[, colnames(pheno_raw) != ""]
+
+# Convert key trait columns to numeric
+pheno_raw$`Yld (kg/ha)` <- as.numeric(pheno_raw$`Yld (kg/ha)`)
+pheno_raw$Protein       <- as.numeric(pheno_raw$Protein)
+pheno_raw$Oil           <- as.numeric(pheno_raw$Oil)
+
+# Check structure of key variables
+str(pheno_raw[, c("Corrected Strain", "Loc", "Year", "Env",
+                  "Yld (kg/ha)", "Protein", "Oil")])
+
+# Count missing values for each trait
+colSums(is.na(pheno_raw[, c("Yld (kg/ha)", "Protein", "Oil")]))
+
+# Descriptive summary of traits
+summary(pheno_raw[, c("Yld (kg/ha)", "Protein", "Oil")])
+
+# Count non-missing observations for each trait
+colSums(!is.na(pheno_raw[, c("Yld (kg/ha)", "Protein", "Oil")]))
+```
+
+### Summary of the cleaned phenotype dataset
+
+After initial cleaning, the phenotype dataset showed substantial differences in data availability across traits. Yield had 6,610 missing observations, while protein and oil each had 20,590 missing values. Correspondingly, yield retained 66,684 non‑missing observations, whereas protein and oil each had 52,704 observations, indicating that seed composition traits were measured together and less frequently than yield. Descriptive summaries of the three traits confirmed that all values were numeric and within expected agronomic ranges, and no malformed or empty columns remained after preprocessing. This cleaned dataset formed the basis for subsequent exploratory analyses and mixed‑model heritability estimation.
+
+### Data exploration
+
+Exploratory analyses were conducted to characterize the distribution of observations across years, locations, and environments, and to evaluate how yield, protein, and oil varied across these factors. Counts of observations by year and location were used to assess data balance, and a single problematic record with a missing location was removed. The number of unique environments and strains was confirmed, and trait means were summarized across environments. Boxplots were generated to visualize trait variation and missingness patterns, revealing strong environmental influence on yield and more moderate variation for protein and oil, with several environments lacking seed composition measurements.
+
+```{r}
+library(ggplot2)
+
+# Observations by year
+table(pheno_raw$Year)
+
+# Observations by location
+table(pheno_raw$Loc)
+
+# Remove rows with missing or blank location
+pheno_raw <- pheno_raw[!(pheno_raw$Loc == "" | is.na(pheno_raw$Loc)), ]
+dim(pheno_raw)
+
+# Unique environments and strains
+c(
+  n_env = length(unique(pheno_raw$Env)),
+  n_strain = length(unique(pheno_raw$`Corrected Strain`))
+)
+
+# Environment distribution
+table(pheno_raw$Env)
+
+# Yield variation across environments
+aggregate(`Yld (kg/ha)` ~ Env, data = pheno_raw, mean, na.rm = TRUE)
+
+# Yield boxplot
+yield_plot <- pheno_raw[!is.na(pheno_raw$`Yld (kg/ha)`), ]
+env_order <- with(
+  aggregate(`Yld (kg/ha)` ~ Env, data = yield_plot, mean),
+  Env[order(`Yld (kg/ha)`, decreasing = TRUE)]
+)
+yield_plot$Env <- factor(yield_plot$Env, levels = env_order)
+
+ggplot(yield_plot, aes(x = Env, y = `Yld (kg/ha)`, fill = Env)) +
+  geom_boxplot(outlier.size = 0.5) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 2) +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+  labs(
+    title = "Yield Variation Across Environments",
+    x = "Environment",
+    y = "Yield (kg/ha)"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none")
+
+# Protein variation across environments
+aggregate(Protein ~ Env, data = pheno_raw, mean, na.rm = TRUE)
+
+# Protein boxplot
+all_env <- sort(unique(pheno_raw$Env))
+protein_plot <- pheno_raw[!is.na(pheno_raw$Protein), ]
+protein_plot$Env <- factor(protein_plot$Env, levels = all_env)
+
+ggplot(protein_plot, aes(x = Env, y = Protein, fill = Env)) +
+  geom_boxplot(outlier.size = 0.5) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 2) +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+  scale_x_discrete(drop = FALSE) +
+  labs(
+    title = "Protein Variation Across Environments",
+    x = "Environment",
+    y = "Protein (%)"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none")
+
+# Oil variation across environments
+aggregate(Oil ~ Env, data = pheno_raw, mean, na.rm = TRUE)
+
+# Oil boxplot
+oil_plot <- pheno_raw[!is.na(pheno_raw$Oil), ]
+oil_plot$Env <- factor(oil_plot$Env, levels = all_env)
+
+ggplot(oil_plot, aes(x = Env, y = Oil, fill = Env)) +
+  geom_boxplot(outlier.size = 0.5) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 2) +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+  scale_x_discrete(drop = FALSE) +
+  labs(
+    title = "Oil Variation Across Environments",
+    x = "Environment",
+    y = "Oil (%)"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none")
+```
+
+## Summary of exploratory findings
+
+Observations were unevenly distributed across years, with 2012 and 2013 contributing the majority of measurements. Locations were also unbalanced, with Michigan having notably few observations. After removing one record with a missing location, the dataset contained 73,293 rows and 28 columns. Nineteen environments and 5,219 strains were represented. Yield showed strong environmental influence, while protein and oil exhibited more moderate variation and were missing entirely in several environments (e.g., 2012_KS, 2012_MI). These patterns highlight the unbalanced structure of the dataset and the differing environmental sensitivity of the three traits.
+
+## Variance decomposition and heritability
+
+Variance components were estimated for yield, protein, and oil using linear mixed models with random effects for genotype, environment, and genotype‑by‑environment interaction (G×E). For each trait, the fitted model partitioned the total phenotypic variance into contributions from these components and the residual error. Proportional variance contributions were computed to compare the relative influence of genotype, environment, and G×E across traits. Broad‑sense heritability across environments was then estimated using variance components adjusted for the number of environments and total observations contributing to each trait.
+
+```{r}
+library(lme4)
+
+# Yield model and raw variance components
+yield_dat <- pheno_raw[!is.na(pheno_raw$`Yld (kg/ha)`), ]
+
+mod_yield <- lmer(
+  `Yld (kg/ha)` ~ (1|`Corrected Strain`) + (1|Env) + (1|`Corrected Strain`:Env),
+  data = yield_dat
+)
+
+VarCorr(mod_yield)
+
+# Proportion of variance for any trait
+get_varprop <- function(trait_name) {
+  
+  dat <- pheno_raw[!is.na(pheno_raw[[trait_name]]), ]
+  
+  form <- as.formula(
+    paste0("`", trait_name, "` ~ (1|`Corrected Strain`) + (1|Env) + (1|`Corrected Strain`:Env)")
+  )
+  
+  mod <- lmer(form, data = dat)
+  
+  vc <- as.data.frame(VarCorr(mod))[, c("grp", "vcov")]
+  
+  vc$grp[vc$grp == "Corrected Strain"] <- "Genotype"
+  vc$grp[vc$grp == "Env"] <- "Environment"
+  vc$grp[vc$grp == "Corrected Strain:Env"] <- "GxE"
+  vc$grp[vc$grp == "Residual"] <- "Residual"
+  
+  vc$Proportion <- vc$vcov / sum(vc$vcov)
+  vc$Trait <- trait_name
+  
+  vc[, c("Trait", "grp", "vcov", "Proportion")]
+}
+
+varprop_yield   <- get_varprop("Yld (kg/ha)")
+varprop_protein <- get_varprop("Protein")
+varprop_oil     <- get_varprop("Oil")
+
+varprop_yield
+varprop_protein
+varprop_oil
+
+# Rename columns for heritability function
+pheno <- pheno_raw
+names(pheno)[names(pheno) == "Corrected Strain"] <- "Strain"
+names(pheno)[names(pheno) == "Yld (kg/ha)"]      <- "Yld"
+
+# Broad-sense heritability across environments
+compute_H2 <- function(trait_name) {
+  
+  dat <- pheno[!is.na(pheno[[trait_name]]), ]
+  
+  n_env <- length(unique(dat$Env))
+  n_obs <- nrow(dat)
+  
+  form <- as.formula(
+    paste0(trait_name, " ~ (1|Strain) + (1|Env) + (1|Strain:Env)")
+  )
+  
+  mod <- lmer(form, data = dat)
+  
+  vc <- as.data.frame(VarCorr(mod))
+  
+  sigma_g  <- vc$vcov[vc$grp == "Strain"]
+  sigma_ge <- vc$vcov[vc$grp == "Strain:Env"]
+  sigma_e  <- vc$vcov[vc$grp == "Residual"]
+  
+  H2 <- sigma_g / (sigma_g + (sigma_ge / n_env) + (sigma_e / n_obs))
+  
+  list(
+    Trait = trait_name,
+    H2 = H2,
+    sigma_g = sigma_g,
+    sigma_ge = sigma_ge,
+    sigma_e = sigma_e,
+    n_env = n_env,
+    n_obs = n_obs
+  )
+}
+
+H2_yield   <- compute_H2("Yld")
+H2_protein <- compute_H2("Protein")
+H2_oil     <- compute_H2("Oil")
+
+
+# Combine variance proportions for all traits
+varprop_all <- rbind(
+  varprop_yield,
+  varprop_protein,
+  varprop_oil
+)
+
+# Clean trait names for readability
+varprop_all$Trait <- gsub("Yld \\(kg/ha\\)", "Yield", varprop_all$Trait)
+
+# Create heritability summary table
+H2_table <- data.frame(
+  Trait = c("Yield", "Protein", "Oil"),
+  H2 = c(H2_yield$H2, H2_protein$H2, H2_oil$H2)
+)
+
+# Merge variance proportions with heritability
+summary_table <- merge(
+  varprop_all,
+  H2_table,
+  by = "Trait",
+  all.x = TRUE
+)
+
+# Reorder columns
+summary_table <- summary_table[, c("Trait", "grp", "vcov", "Proportion", "H2")]
+
+# Display formatted table of the three traits
+knitr::kable(
+  summary_table,
+  caption = "Summary of Variance Components and Broad-Sense Heritability for Yield, Protein, and Oil",
+  digits = 3
+)
+
+```
+
+## Summary of variance and heritability results
+
+Variance decomposition showed that environment contributed the largest share of variance for yield, consistent with its strong environmental sensitivity. Protein and oil displayed smaller environmental variance and relatively larger genetic components, reflecting their greater stability across environments. G×E contributed moderately to all traits. Broad‑sense heritability estimates were high for all three traits, with H² ≈ 0.96 for yield and ≈ 0.97 for both protein and oil, indicating that despite environmental effects, the genetic signal remains strong and suitable for downstream GWAS and genomic prediction.
+
+# Multi‑environment BLUP Estimation
+
+This section extends the variance and heritability analysis by estimating genotype Best Linear Unbiased Predictors (BLUPs) for yield, protein, and oil across environments. These BLUPs represent shrinkage‑adjusted genotype performance and will serve as inputs for downstream genomic prediction and GWAS analyses.
+
+## Prepare phenotype factors
+
+```{r}
+pheno$Strain <- factor(pheno$Strain)
+pheno$Env    <- factor(pheno$Env)
+
+```
+
+## Yield BLUPs
+
+```{r}
+library(lme4)
+
+mod_yld <- lmer(
+  Yld ~ (1|Strain) + (1|Env) + (1|Strain:Env),
+  data = pheno[!is.na(pheno$Yld), ]
+)
+
+yld_blups <- data.frame(
+  Strain   = rownames(ranef(mod_yld)$Strain),
+  Yld_BLUP = ranef(mod_yld)$Strain[, 1]
+)
+
+head(yld_blups)
+
+```
+
+# Protein BLUPs
+
+```{r}
+mod_protein <- lmer(
+  Protein ~ (1|Strain) + (1|Env) + (1|Strain:Env),
+  data = pheno[!is.na(pheno$Protein), ]
+)
+
+protein_blups <- data.frame(
+  Strain        = rownames(ranef(mod_protein)$Strain),
+  Protein_BLUP  = ranef(mod_protein)$Strain[, 1]
+)
+
+head(protein_blups)
+
+```
+
+# Oil BLUPs
+
+```{r}
+mod_oil <- lmer(
+  Oil ~ (1|Strain) + (1|Env) + (1|Strain:Env),
+  data = pheno[!is.na(pheno$Oil), ]
+)
+
+oil_blups <- data.frame(
+  Strain     = rownames(ranef(mod_oil)$Strain),
+  Oil_BLUP   = ranef(mod_oil)$Strain[, 1]
+)
+
+head(oil_blups)
+
+```
+
+# BLUP Summary Table
+
+```{r}
+# Merge BLUPs into a single summary table
+blup_summary <- Reduce(
+  function(x, y) merge(x, y, by = "Strain", all = TRUE),
+  list(yld_blups, protein_blups, oil_blups)
+)
+
+# Display the first rows
+head(blup_summary)
+
+```
+
+```{r, results="hide"}
+# Generate formatted table of the three traits
+knitr::kable(
+  blup_summary,
+  caption = "Summary of genotype BLUPs for Yield, Protein, and Oil across environments",
+  digits = 3
+)
+
+```
