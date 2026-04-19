@@ -1,0 +1,2904 @@
+---
+title: "Genomic Data Analysis Final Project"
+author: "Ayodele Amodu & Orrie Feitsma"
+format: html
+editor: visual
+echo: true
+execute:
+  freeze: auto
+---
+
+## Introduction
+
+Improving yield, seed protein, and oil content remain a central challenge in soybean breeding because these traits are economically critical yet genetically complex. Yield is highly polygenic and strongly influenced by environmental variation @Sharma2024, while protein and oil content often exhibit antagonistic genetic correlations @Diers2018, making simultaneous improvement difficult. Breeders must also contend with genotype × environment interactions (G×E), which cause genotypes to perform inconsistently across locations and years, reducing the reliability of selection decisions @Akram2016. Traditional phenotypic selection is further constrained by the cost and time required to generate multi-environment field data, as well as the limited ability to dissect the underlying genetic architecture of these traits.
+
+Although phenotypic selection alone is time consuming and not maximally effective, accurate phenotyping is crucial for understanding the heritability and variance components of traits and for obtaining accurate results from genomic inferences and predictions. Heritability refers to the ability of a trait to be passed down from parent to progeny or the portion of total phenotypic variance that can be attributed to genotype. An accurate understanding of heritability is crucial for estimating a population’s response to selection and the potential genetic gain that can be expected @Holland2003. A higher heritability suggests that selection is simpler, and the trait is likely only controlled by one or a few genes, while low heritability is typically associated with complex, polygenic traits. The variance components involved in phenotypic variance and heritability, such as dominance and additive variance, can further be parsed apart, and linear mixed models are typically used for this.
+
+Advances in high-density SNP genotyping (e.g., SoySNP50K) and mixed model statistical frameworks now enable more precise estimation of genetic effects, partitioning of G×E, and prediction of breeding values using genome-wide markers (Ravelombola et al., 2021; Zhang et al., 2016). The genomic data acquired by SNP genotyping can be used for various downstream applications that allow breeders to make both large-scale inferences and powerful predictions. For example, SNP data and phenotypic data can be collected from a diverse population and analyzed in a genome-wide association study (GWAS), which allows researchers to identify SNPs in regions of the genome that are significantly associated with a trait of interest @Clauw2025. Genotypic and phenotypic data can also be used for genomic selection (GS), which involves building and training a model to predict breeding values of individuals based on a score at each SNP @Escamilla2025.
+
+By integrating multi-environment phenotypic data with genomic information, this project aims to characterize the genetic architecture of yield, protein, and oil content, quantify their heritability, and evaluate the potential of genomic prediction to accelerate selection for improved seed quality and productivity in soybean. We will infer variance components and heritability using phenotypic data, identify SNPs associated with oil, protein, and yield using GWAS, and predict the performance of progeny from a subset of lines in this data using a GS model.
+
+
+### Data sources and type
+
+**Genotypic data.** Imputed genotypes of the 5,176 Nested Association Mapping (NAM) recombinant inbred lines (RILs), derived from 40 NAM parental genotypes and obtained using the SoySNP50K and SoyNAM6K assays, were used in this project. The SNP arrays were aligned to the Williams 82 reference genome assembly (Wm82.a2). The imputed genotype dataset is publicly available at [SoyBase](https://data.soybase.org/Glycine/max/diversity/Wm82.gnm2.div.Song_NAM_2021a/).
+
+**Phenotypic and metadata.** Phenotypic data and associated metadata were obtained from the USDA Soybean Nested Association Mapping (SoyNAM) project, which provides large‑scale field evaluations of soybean lines across multiple locations and years to study complex agronomic and seed composition traits. The SoyNAM project resources are available at [SoyBase Legacy](https://legacy.soybase.org/).
+
+### Data wrangling
+
+Phenotypic data were imported from the raw text file and cleaned prior to downstream analyses. Empty columns created by trailing delimiters were removed, and key agronomic traits (yield, protein, and oil) were converted to numeric format to ensure compatibility with statistical modeling. Basic structural checks were performed to confirm correct variable types and naming. Missing data patterns were quantified to assess trait completeness across environments, and descriptive summaries were generated to characterize the distribution and scale of each trait. These steps ensured that the phenotype dataset was properly formatted, internally consistent, and ready for exploratory analyses and mixed‑model variance component estimation.
+
+```{r}
+# Load phenotype data
+data_dir <- "C:/Users/otf0002/Downloads"
+pheno_file <- file.path(data_dir, "phenotypic_data.txt")
+
+pheno_raw <- read.table(
+  pheno_file,
+  header = TRUE,
+  sep = "\t",
+  fill = TRUE,
+  quote = "",
+  comment.char = "",
+  stringsAsFactors = FALSE,
+  check.names = FALSE
+)
+
+# Remove empty columns created by trailing tabs
+pheno_raw <- pheno_raw[, colnames(pheno_raw) != ""]
+
+# Convert key trait columns to numeric
+pheno_raw$`Yld (kg/ha)` <- as.numeric(pheno_raw$`Yld (kg/ha)`)
+pheno_raw$Protein       <- as.numeric(pheno_raw$Protein)
+pheno_raw$Oil           <- as.numeric(pheno_raw$Oil)
+
+# Check structure of key variables
+str(pheno_raw[, c("Corrected Strain", "Loc", "Year", "Env",
+                  "Yld (kg/ha)", "Protein", "Oil")])
+
+# Count missing values for each trait
+colSums(is.na(pheno_raw[, c("Yld (kg/ha)", "Protein", "Oil")]))
+
+# Descriptive summary of traits
+summary(pheno_raw[, c("Yld (kg/ha)", "Protein", "Oil")])
+
+# Count non-missing observations for each trait
+colSums(!is.na(pheno_raw[, c("Yld (kg/ha)", "Protein", "Oil")]))
+```
+
+### Summary of the cleaned phenotype dataset
+
+After initial cleaning, the phenotype dataset showed substantial differences in data availability across traits. Yield had 6,610 missing observations, while protein and oil each had 20,590 missing values. Correspondingly, yield retained 66,684 non‑missing observations, whereas protein and oil each had 52,704 observations, indicating that seed composition traits were measured together and less frequently than yield. Descriptive summaries of the three traits confirmed that all values were numeric and within expected agronomic ranges, and no malformed or empty columns remained after preprocessing. This cleaned dataset formed the basis for subsequent exploratory analyses and mixed‑model heritability estimation.
+
+### Data exploration
+
+Exploratory analyses were conducted to characterize the distribution of observations across years, locations, and environments, and to evaluate how yield, protein, and oil varied across these factors. Counts of observations by year and location were used to assess data balance, and a single problematic record with a missing location was removed. The number of unique environments and strains was confirmed, and trait means were summarized across environments. Boxplots were generated to visualize trait variation and missingness patterns, revealing strong environmental influence on yield and more moderate variation for protein and oil, with several environments lacking seed composition measurements.
+
+```{r}
+library(ggplot2)
+
+# Observations by year
+table(pheno_raw$Year)
+
+# Observations by location
+table(pheno_raw$Loc)
+
+# Remove rows with missing or blank location
+pheno_raw <- pheno_raw[!(pheno_raw$Loc == "" | is.na(pheno_raw$Loc)), ]
+dim(pheno_raw)
+
+# Unique environments and strains
+c(
+  n_env = length(unique(pheno_raw$Env)),
+  n_strain = length(unique(pheno_raw$`Corrected Strain`))
+)
+
+# Environment distribution
+table(pheno_raw$Env)
+
+# Yield variation across environments
+aggregate(`Yld (kg/ha)` ~ Env, data = pheno_raw, mean, na.rm = TRUE)
+
+# Yield boxplot
+yield_plot <- pheno_raw[!is.na(pheno_raw$`Yld (kg/ha)`), ]
+env_order <- with(
+  aggregate(`Yld (kg/ha)` ~ Env, data = yield_plot, mean),
+  Env[order(`Yld (kg/ha)`, decreasing = TRUE)]
+)
+yield_plot$Env <- factor(yield_plot$Env, levels = env_order)
+
+ggplot(yield_plot, aes(x = Env, y = `Yld (kg/ha)`, fill = Env)) +
+  geom_boxplot(outlier.size = 0.5) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 2) +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+  labs(
+    title = "Yield Variation Across Environments",
+    x = "Environment",
+    y = "Yield (kg/ha)"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none")
+
+# Protein variation across environments
+aggregate(Protein ~ Env, data = pheno_raw, mean, na.rm = TRUE)
+
+# Protein boxplot
+all_env <- sort(unique(pheno_raw$Env))
+protein_plot <- pheno_raw[!is.na(pheno_raw$Protein), ]
+protein_plot$Env <- factor(protein_plot$Env, levels = all_env)
+
+ggplot(protein_plot, aes(x = Env, y = Protein, fill = Env)) +
+  geom_boxplot(outlier.size = 0.5) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 2) +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+  scale_x_discrete(drop = FALSE) +
+  labs(
+    title = "Protein Variation Across Environments",
+    x = "Environment",
+    y = "Protein (%)"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none")
+
+# Oil variation across environments
+aggregate(Oil ~ Env, data = pheno_raw, mean, na.rm = TRUE)
+
+# Oil boxplot
+oil_plot <- pheno_raw[!is.na(pheno_raw$Oil), ]
+oil_plot$Env <- factor(oil_plot$Env, levels = all_env)
+
+ggplot(oil_plot, aes(x = Env, y = Oil, fill = Env)) +
+  geom_boxplot(outlier.size = 0.5) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 2) +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+  scale_x_discrete(drop = FALSE) +
+  labs(
+    title = "Oil Variation Across Environments",
+    x = "Environment",
+    y = "Oil (%)"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none")
+```
+
+## Summary of exploratory findings
+
+Observations were unevenly distributed across years, with 2012 and 2013 contributing the majority of measurements. Locations were also unbalanced, with Michigan having notably few observations. After removing one record with a missing location, the dataset contained 73,293 rows and 28 columns. Nineteen environments and 5,219 strains were represented. Yield showed strong environmental influence, while protein and oil exhibited more moderate variation and were missing entirely in several environments (e.g., 2012_KS, 2012_MI). These patterns highlight the unbalanced structure of the dataset and the differing environmental sensitivity of the three traits.
+
+## Variance decomposition and heritability
+
+Variance components were estimated for yield, protein, and oil using linear mixed models with random effects for genotype, environment, and genotype‑by‑environment interaction (G×E). For each trait, the fitted model partitioned the total phenotypic variance into contributions from these components and the residual error. Proportional variance contributions were computed to compare the relative influence of genotype, environment, and G×E across traits. Broad‑sense heritability across environments was then estimated using variance components adjusted for the number of environments and total observations contributing to each trait.
+
+```{r}
+library(lme4)
+
+# Yield model and raw variance components
+yield_dat <- pheno_raw[!is.na(pheno_raw$`Yld (kg/ha)`), ]
+
+mod_yield <- lmer(
+  `Yld (kg/ha)` ~ (1|`Corrected Strain`) + (1|Env) + (1|`Corrected Strain`:Env),
+  data = yield_dat
+)
+
+VarCorr(mod_yield)
+
+# Proportion of variance for any trait
+get_varprop <- function(trait_name) {
+  
+  dat <- pheno_raw[!is.na(pheno_raw[[trait_name]]), ]
+  
+  form <- as.formula(
+    paste0("`", trait_name, "` ~ (1|`Corrected Strain`) + (1|Env) + (1|`Corrected Strain`:Env)")
+  )
+  
+  mod <- lmer(form, data = dat)
+  
+  vc <- as.data.frame(VarCorr(mod))[, c("grp", "vcov")]
+  
+  vc$grp[vc$grp == "Corrected Strain"] <- "Genotype"
+  vc$grp[vc$grp == "Env"] <- "Environment"
+  vc$grp[vc$grp == "Corrected Strain:Env"] <- "GxE"
+  vc$grp[vc$grp == "Residual"] <- "Residual"
+  
+  vc$Proportion <- vc$vcov / sum(vc$vcov)
+  vc$Trait <- trait_name
+  
+  vc[, c("Trait", "grp", "vcov", "Proportion")]
+}
+
+varprop_yield   <- get_varprop("Yld (kg/ha)")
+varprop_protein <- get_varprop("Protein")
+varprop_oil     <- get_varprop("Oil")
+
+varprop_yield
+varprop_protein
+varprop_oil
+
+# Rename columns for heritability function
+pheno <- pheno_raw
+names(pheno)[names(pheno) == "Corrected Strain"] <- "Strain"
+names(pheno)[names(pheno) == "Yld (kg/ha)"]      <- "Yld"
+
+# Broad-sense heritability across environments
+compute_H2 <- function(trait_name) {
+  
+  dat <- pheno[!is.na(pheno[[trait_name]]), ]
+  
+  n_env <- length(unique(dat$Env))
+  n_obs <- nrow(dat)
+  
+  form <- as.formula(
+    paste0(trait_name, " ~ (1|Strain) + (1|Env) + (1|Strain:Env)")
+  )
+  
+  mod <- lmer(form, data = dat)
+  
+  vc <- as.data.frame(VarCorr(mod))
+  
+  sigma_g  <- vc$vcov[vc$grp == "Strain"]
+  sigma_ge <- vc$vcov[vc$grp == "Strain:Env"]
+  sigma_e  <- vc$vcov[vc$grp == "Residual"]
+  
+  H2 <- sigma_g / (sigma_g + (sigma_ge / n_env) + (sigma_e / n_obs))
+  
+  list(
+    Trait = trait_name,
+    H2 = H2,
+    sigma_g = sigma_g,
+    sigma_ge = sigma_ge,
+    sigma_e = sigma_e,
+    n_env = n_env,
+    n_obs = n_obs
+  )
+}
+
+H2_yield   <- compute_H2("Yld")
+H2_protein <- compute_H2("Protein")
+H2_oil     <- compute_H2("Oil")
+
+
+# Combine variance proportions for all traits
+varprop_all <- rbind(
+  varprop_yield,
+  varprop_protein,
+  varprop_oil
+)
+
+# Clean trait names for readability
+varprop_all$Trait <- gsub("Yld \\(kg/ha\\)", "Yield", varprop_all$Trait)
+
+# Create heritability summary table
+H2_table <- data.frame(
+  Trait = c("Yield", "Protein", "Oil"),
+  H2 = c(H2_yield$H2, H2_protein$H2, H2_oil$H2)
+)
+
+# Merge variance proportions with heritability
+summary_table <- merge(
+  varprop_all,
+  H2_table,
+  by = "Trait",
+  all.x = TRUE
+)
+
+# Reorder columns
+summary_table <- summary_table[, c("Trait", "grp", "vcov", "Proportion", "H2")]
+
+# Display formatted table of the three traits
+knitr::kable(
+  summary_table,
+  caption = "Summary of Variance Components and Broad-Sense Heritability for Yield, Protein, and Oil",
+  digits = 3
+)
+
+```
+
+## Summary of variance and heritability results
+
+Variance decomposition showed that environment contributed the largest share of variance for yield, consistent with its strong environmental sensitivity. Protein and oil displayed smaller environmental variance and relatively larger genetic components, reflecting their greater stability across environments. G×E contributed moderately to all traits. Broad‑sense heritability estimates were high for all three traits, with H² ≈ 0.96 for yield and ≈ 0.97 for both protein and oil, indicating that despite environmental effects, the genetic signal remains strong and suitable for downstream GWAS and genomic prediction.
+
+# Multi‑environment BLUP Estimation
+
+This section extends the variance and heritability analysis by estimating genotype Best Linear Unbiased Predictors (BLUPs) for yield, protein, and oil across environments. These BLUPs represent shrinkage‑adjusted genotype performance and will serve as inputs for downstream genomic prediction and GWAS analyses.
+
+## Prepare phenotype factors
+
+```{r}
+pheno$Strain <- factor(pheno$Strain)
+pheno$Env    <- factor(pheno$Env)
+
+```
+
+## Yield BLUPs
+
+```{r}
+library(lme4)
+
+mod_yld <- lmer(
+  Yld ~ (1|Strain) + (1|Env) + (1|Strain:Env),
+  data = pheno[!is.na(pheno$Yld), ]
+)
+
+yld_blups <- data.frame(
+  Strain   = rownames(ranef(mod_yld)$Strain),
+  Yld_BLUP = ranef(mod_yld)$Strain[, 1]
+)
+
+head(yld_blups)
+
+```
+
+# Protein BLUPs
+
+```{r}
+mod_protein <- lmer(
+  Protein ~ (1|Strain) + (1|Env) + (1|Strain:Env),
+  data = pheno[!is.na(pheno$Protein), ]
+)
+
+protein_blups <- data.frame(
+  Strain        = rownames(ranef(mod_protein)$Strain),
+  Protein_BLUP  = ranef(mod_protein)$Strain[, 1]
+)
+
+head(protein_blups)
+
+```
+
+# Oil BLUPs
+
+```{r}
+mod_oil <- lmer(
+  Oil ~ (1|Strain) + (1|Env) + (1|Strain:Env),
+  data = pheno[!is.na(pheno$Oil), ]
+)
+
+oil_blups <- data.frame(
+  Strain     = rownames(ranef(mod_oil)$Strain),
+  Oil_BLUP   = ranef(mod_oil)$Strain[, 1]
+)
+
+head(oil_blups)
+
+```
+
+# BLUP Summary Table
+
+```{r}
+# Merge BLUPs into a single summary table
+blup_summary <- Reduce(
+  function(x, y) merge(x, y, by = "Strain", all = TRUE),
+  list(yld_blups, protein_blups, oil_blups)
+)
+
+# Display the first rows
+head(blup_summary)
+
+```
+
+```{r, results="hide"}
+# Generate formatted table of the three traits
+knitr::kable(
+  blup_summary,
+  caption = "Summary of genotype BLUPs for Yield, Protein, and Oil across environments",
+  digits = 3
+)
+
+```
+
+
+# GWAS
+
+## GWAS Background
+
+A genome wide association study (GWAS) is a powerful tool which allows researchers to identify SNPs and genomic regions associated with traits of interest in a population. GWAS requires a diverse population, high quality genomic data, and accurate phenotypic data to render useful results. The discovery of associated SNPs relies on the high density of polymorphic markers the genomes of a population and the linkage disequilibrium that causes certain SNPs to remain near casual polymorphisms during recombination.
+
+The basic statistical principle of a GWAS is fairly simple; however, the huge number of SNPs that must be tested and the limited amount of phenotypic data relative to genotypic data make GWAS more complicated and computing intensive. Another complicating factor is that genetic relatedness within the test population can lead to false positive associations at SNPs (He & Gai, 2023). This is accounted fro using a kinship matrix and multiple statistical models. The basic GWAS formula is the foundation for all analyses ad is shown below.
+
+$$ y = µ+xβ + ε $$ Where y is the phenotype, x is the genotype at each SNP coded as 0, 1, or 2 µ is the mean value of individuals, β is the effect of the SNP, and ε is the residual error.
+
+Due to the high importance of yield, oil, and protein in soybean cultivars, the identification of novel SNPs that are associated with these traits is extremely valuable for breeders when making selections. The goal of this part of the project was to run multiple GWAS analyses using several different models for each of the three traits mentioned. Expected vs actual log p-values were used to determine which models limited p-value inflation, and these models were selected. SNPs that were found to be significant across multiple models are likely to be good candidates for future research and integration into MAS or GS. Once fully validated, these SNPs can be used during selection of early generation crosses within the tested population to cull inferior plants and make greater genetic gain.
+
+## Data Analysis
+### Importing and cleaning genotypic data
+
+First, we import our genotypic data.
+
+```{r}
+
+library(tidyverse)
+library(tidyr)
+
+snps<-read_delim(("C:/Users/otf0002/Downloads/SoyNAM parents+progeny 4312 SNP genotypes Wm82 (5).a2"),na = "-") %>% 
+  select(-dbSNP_ID,-Chr_Wm82.a2,-Position_Wm82.a2) %>% 
+  column_to_rownames(var = "DEPRECATED-BARCSOYNAMSNP6K_ID")
+dosage<-snps %>%
+  mutate(across(.cols=everything(),
+                ~ ifelse(.x=="A","0",
+                         ifelse(.x=="H","1",
+                                ifelse(.x=="B","2",.x))))) 
+sort(unique(unlist(snps)))
+sort(unique(unlist(dosage)))
+any(is.na(dosage))
+sum(is.na(dosage))
+
+# seems there are only 0,1,2 values and missing 
+# which is what we want
+
+dosage<-dosage %>% 
+  mutate(across(everything(),as.numeric)) %>% 
+  as.matrix %>% 
+  t()
+
+# table(dosage)
+```
+
+Then, we filter our genotypic data.
+
+```{r}
+library(ASRgenomics)
+
+qc <- qc.filtering(M=dosage,
+                   maf         = 0.05, # keep markers with MAF >= 0.01
+                   marker.call = 0.95, # keep SNPs called in >= 95% of indivs
+                   ind.call    = 0.80, # keep individuals with >= 80% SNPs called
+                   imput       = TRUE) # simple mean imputation
+
+dosage<-qc$M.clean
+```
+
+### Importing and filtering phenotypic data
+
+Then, we import our phenotypic data and filter it to match up with our genotypic data.
+
+```{r}
+## The trimmed.csv file was produced by importing the raw data into r, then removing all columns except Strain, Year, Environment, Yld, Oil, and Protein. Then this data was exported to a csv.file, so we could work with a trimmed subset of data. The code to do this is shown below. 
+
+pdata <-  read.delim("C:/Users/otf0002/Downloads/SoyNAM all familes phenotype data.txt (1)/SoyNAM all familes phenotype data.txt", header = TRUE)
+wholedata <- pdata %>% dplyr:: select(Year, Env, Corrected.Strain, Yld..kg.ha., Oil, Protein) %>% dplyr::rename(Strain = Corrected.Strain, Yld = Yld..kg.ha.)
+
+write.csv(wholedata, "~/Orrie/Class Materials/genomic proposal_files/trimmedpheno.csv", row.names = FALSE)
+
+### importing trimmed cvs and filtering to remove missing data
+
+wholedata<-read.csv("~/Orrie/Class Materials/genomic proposal_files/trimmedpheno.csv" , na.strings = c(NA,"."))
+
+yld_pheno<-wholedata %>%
+  select(-Protein, -Oil) %>%
+  drop_na %>%
+  filter(Strain %in% rownames(dosage))
+
+dosage<-dosage[rownames(dosage) %in% yld_pheno$Strain,]
+
+yld_pheno<-yld_pheno %>% 
+  arrange(Env) %>% 
+  mutate(Env=factor(Env),
+         Strain=factor(Strain,levels=rownames(dosage)))
+
+
+```
+
+### BLUP extractions 
+
+Next, we run an asreml model on our pheotypic data and extract the BLUPs from the results.
+```{r}
+library(asreml)
+asr_yld1<-asreml(Yld ~ Env,
+                   random = ~Strain ,
+                   residual = ~dsum(~units|Env),
+                   data = yld_pheno)
+
+# summary(asr_yld1)
+
+
+yldblups<-summary(asr_yld1,coef=T)$coef.random  %>%
+  # confert to data.frame
+  as.data.frame %>%
+  # change the rownames to a column the the data.frame
+  rownames_to_column(var = "Strain") %>%
+  # filter to only the BLUPs for the entry main-effect
+  # (output includes all random terms)
+  filter(grepl("^Strain_",Strain)) %>%
+  # for good measure, tidy data,
+  # need to remove a prefix that asreml added to each entry name
+  mutate(Strain=gsub("Strain_","",Strain,fixed = T)) %>%
+  select(-z.ratio, -std.error) %>%
+  relocate(last_col(), .before = 1) %>%
+  rename(Yld = solution)
+
+# yldblups$Yld %>% hist
+```
+
+### Format arguments for GAPIT We then format MyY, MyGD, and MyGM in a way that GAPIT is happy with.
+
+```{r}
+library(tidyverse)
+
+# --- phenotype for GAPIT ---
+myY <- yldblups %>%
+  transmute(Taxa = as.character(Strain),
+            Yld  = as.numeric(Yld)) %>%
+  as.data.frame(stringsAsFactors = FALSE)
+
+# --- genotype for GAPIT ---
+# dosage is your final QC'd matrix: rows = taxa, cols = SNPs
+stopifnot(is.matrix(dosage))
+
+myGD <- data.frame(
+  Taxa = rownames(dosage),
+  dosage,
+  check.names = FALSE,
+  stringsAsFactors = FALSE
+)
+
+
+# --- map for GAPIT ---
+myGM <- data.frame(
+  SNP = colnames(dosage),
+  stringsAsFactors = FALSE,
+  check.names = FALSE
+)
+
+tmp <- strsplit(myGM$SNP, "_", fixed = TRUE)
+myGM$Chromosome <- as.integer(sub("^Gm", "", vapply(tmp, `[`, character(1), 1)))
+myGM$Position   <- as.integer(vapply(tmp, `[`, character(1), 2))
+
+myGM <- myGM[, c("SNP", "Chromosome", "Position")]
+
+# --- hard checks ---
+stopifnot(!anyDuplicated(myY$Taxa))
+stopifnot(!anyDuplicated(myGD$Taxa))
+stopifnot(!anyDuplicated(myGM$SNP))
+
+stopifnot(nrow(myGM) == ncol(myGD) - 1)
+stopifnot(identical(myGM$SNP, colnames(myGD)[-1]))
+
+# force same taxa order in Y and GD
+keep <- intersect(myY$Taxa, myGD$Taxa)
+myY  <- myY[match(keep, myY$Taxa), , drop = FALSE]
+myGD <- myGD[match(keep, myGD$Taxa), , drop = FALSE]
+
+stopifnot(identical(myY$Taxa, myGD$Taxa))
+
+
+```
+
+### Yield GLM GWAS model
+
+Now, we can run our first GWAS model, and can run multiple mode tpyes using the same variables. We repeat the above steps for oil and protein in later sections.
+
+```{r}
+library(GAPIT)
+
+yglm <- GAPIT(
+  Y = myY,
+  GD = myGD,
+  GM = myGM,
+  model = "GLM",
+  PCA.total = 0,
+  file.output = FALSE
+)
+```
+
+#### Manhattan plot
+
+```{r}
+library(qqman) 
+yglm$GWAS %>% 
+  manhattan(.,chr = "Chromosome",bp = "Position ",p = "P.value")
+  
+qq(yglm$GWAS$P.value)
+
+### how many snps on each chromosome
+ygGWASresults<-yglm$GWAS
+as.data.frame(table(ygGWASresults$Chromosome))
+
+#extract significant SNPs at .01 thershold
+# used more strict threshold to be more confident in SNPs
+
+bonf_threshold <- .01 / nrow(yglm$GWAS)
+
+# Filter significant SNPs
+sig_snps <- ygGWASresults[ygGWASresults$P.value <= bonf_threshold, ]
+
+sig_snps
+
+```
+
+The Manhattan plot showed that only 1 significant SNP was identified above the threshold.
+
+### Yield MLM GWAS model
+
+```{r}
+ymlm <- GAPIT(
+  Y = myY,
+  GD = myGD,
+  GM = myGM,
+  model = "MLM",
+  PCA.total = 0,
+  file.output = FALSE
+)
+```
+
+#### Manhattan plot
+
+```{r}
+library(qqman) 
+ymlm$GWAS %>% 
+  manhattan(.,chr = "Chromosome",bp = "Position ",p = "P.value")
+  
+qq(ymlm$GWAS$P.value)
+
+### how many snps on each chromosome
+yGWASresults<-ymlm$GWAS
+as.data.frame(table(yGWASresults$Chromosome))
+
+#extract significant SNPs at .01 thershold
+# used more strict threshold to be more confident in SNPs
+
+bonf_threshold <- .01 / nrow(ymlm$GWAS)
+
+# Filter significant SNPs
+sig_snps <- yGWASresults[yGWASresults$P.value <= bonf_threshold, ]
+
+sig_snps
+```
+
+### Yield MLMM GWAS model
+
+```{r}
+ymlmm <- GAPIT(
+  Y = myY,
+  GD = myGD,
+  GM = myGM,
+  model = "MLMM",
+  PCA.total = 0,
+  file.output = FALSE
+)
+```
+
+#### Manhattan plot
+```{r}
+library(qqman) 
+ymlmm$GWAS %>% 
+  manhattan(.,chr = "Chr",bp = "Pos",p = "P.value")
+  
+qq(ymlmm$GWAS$P.value)
+
+### how many snps on each chromosome
+ymlmmGWASresults<-ymlmm$GWAS
+as.data.frame(table(ymlmmGWASresults$Chr))
+
+#extract significant SNPs at .01 thershold
+
+bonf_threshold <- .01 / nrow(ymlmm$GWAS)
+
+# Filter significant SNPs
+ymlmmsig_snps <- ymlmmGWASresults[ymlmmGWASresults$P.value <= bonf_threshold, ]
+
+ymlmmsig_snps
+```
+
+### Yield FarmCPU GWAS model
+
+```{r}
+ycpu <- GAPIT(
+  Y = myY,
+  GD = myGD,
+  GM = myGM,
+  model = "FarmCPU",
+  PCA.total = 0,
+  file.output = FALSE
+)
+```
+
+#### Manhattan plot
+
+```{r}
+library(qqman) 
+ycpu$GWAS %>% 
+  manhattan(.,chr = "Chromosome",bp = "Position",p = "P.value")
+  
+qq(ycpu$GWAS$P.value)
+
+### how many snps on each chromosome
+ycpuGWASresults<-ycpu$GWAS
+as.data.frame(table(ycpuGWASresults$Chromosome))
+
+#extract significant SNPs at .01 thershold
+
+bonf_threshold <- .01 / nrow(ycpu$GWAS)
+
+# Filter significant SNPs
+cpusig_snps <- ycpuGWASresults[ycpuGWASresults$P.value <= bonf_threshold, ]
+
+cpusig_snps
+```
+
+### PCA calculation
+
+```{r}
+
+###PCA
+
+pcs <- prcomp(dosage, center = TRUE, scale = TRUE) 
+
+summary(pcs)$importance[,1:10]
+
+# Calculate proportion of variance explained
+explained_var <- (pcs$sdev)^2 / sum(pcs$sdev^2)
+explained_var_pc1 <- round(100 * explained_var[1], 1)
+explained_var_pc2 <- round(100 * explained_var[2], 1)
+
+pcscores<-pcs$x %>% as.data.frame
+
+pcscores %>% 
+  ggplot(.,aes(x=PC1,y=PC2)) + geom_point() + 
+  labs(x=paste0("PC1 (", explained_var_pc1, "%)"),
+       y = paste0("PC2 (", explained_var_pc2, "%)"),
+       title = "PCA SNP matrix")
+```
+
+### Manually construct kinship matrix
+
+```{r}
+## hand calculate kinship matrix
+kinship<-function(M){
+  freq <- colMeans(M, na.rm = T)/2
+  P <- matrix(rep(freq, nrow(M)), byrow = T, ncol = ncol(M))
+  Z <- M - 2 * P
+  varD <- sum(2 * freq * (1 - freq))
+  K <- tcrossprod(Z)/varD
+  return(K)
+}
+
+K<-kinship(dosage)
+
+summary(diag(K))
+
+
+summary(K[lower.tri(K, diag=F)])
+
+hist(diag(K), main = "Diagonals of GRM proportional to inbreeding coeffients")
+
+hist(K[lower.tri(K, diag=F)], 
+     main = "Off-Diagonals of GRM - pair-wise genomic relatedness (similarity)")
+
+heatmap(K, main = )
+
+```
+
+### Protein GWAS prep and BLUP extraction
+
+```{r}
+wholedata<-read.csv("~/Orrie/Class Materials/genomic proposal_files/trimmedpheno.csv" , na.strings = c(NA,"."))
+
+snps<-read_delim(("C:/Users/otf0002/Downloads/SoyNAM parents+progeny 4312 SNP genotypes Wm82 (5).a2"),na = "-") %>% 
+  select(-dbSNP_ID,-Chr_Wm82.a2,-Position_Wm82.a2) %>% 
+  column_to_rownames(var = "DEPRECATED-BARCSOYNAMSNP6K_ID")
+dosage<-snps %>%
+  mutate(across(.cols=everything(),
+                ~ ifelse(.x=="A","0",
+                         ifelse(.x=="H","1",
+                                ifelse(.x=="B","2",.x))))) 
+sort(unique(unlist(snps)))
+sort(unique(unlist(dosage)))
+any(is.na(dosage))
+sum(is.na(dosage))
+
+# seems there are only 0,1,2 values and missing 
+# which is what we want
+
+dosage<-dosage %>% 
+  mutate(across(everything(),as.numeric)) %>% 
+  as.matrix %>% 
+  t()
+
+# table(dosage)
+```
+
+```{r}
+library(ASRgenomics)
+
+qc <- qc.filtering(M=dosage,
+                   maf         = 0.05, # keep markers with MAF >= 0.01
+                   marker.call = 0.95, # keep SNPs called in >= 95% of indivs
+                   ind.call    = 0.80, # keep individuals with >= 80% SNPs called
+                   imput       = TRUE) # simple mean imputation
+
+dosage<-qc$M.clean
+```
+
+#### Phenotypic data cleaning
+```{r}
+prot_pheno<-wholedata %>%
+  select(-Yld, -Oil) %>%
+  drop_na %>%
+  filter(Strain %in% rownames(dosage))
+
+dosage<-dosage[rownames(dosage) %in% prot_pheno$Strain,]
+
+prot_pheno<-prot_pheno %>% 
+  arrange(Env) %>% 
+  mutate(Env=factor(Env),
+         Strain=factor(Strain,levels=rownames(dosage)))
+
+library(asreml)
+asr_prot<-asreml(Protein ~ Env,
+                 random = ~Strain ,
+                 residual = ~dsum(~units|Env),
+                 data = prot_pheno)
+
+### extract blups
+protblups<-summary(asr_prot,coef=T)$coef.random  %>%
+  # confert to data.frame
+  as.data.frame %>%
+  # change the rownames to a column the the data.frame
+  rownames_to_column(var = "Strain") %>%
+  # filter to only the BLUPs for the entry main-effect
+  # (output includes all random terms)
+  filter(grepl("^Strain_",Strain)) %>%
+  # for good measure, tidy data,
+  # need to remove a prefix that asreml added to each entry name
+  mutate(Strain=gsub("Strain_","",Strain,fixed = T)) %>%
+  select(-z.ratio, -std.error) %>%
+  relocate(last_col(), .before = 1) %>%
+  rename(Protein = solution)
+
+
+ggsnps_filt_centered<-scale(dosage,scale = F, center = T)
+
+protblups<-protblups %>% 
+  mutate(Strain=factor(Strain))
+```
+
+### Format arguments for GAPIT We then format MyY, MyGD, and MyGM in a way that GAPIT is happy with.
+```{r}
+myYp <- protblups %>%
+  transmute(Taxa = as.character(Strain),
+            Protein  = as.numeric(Protein)) %>%
+  as.data.frame(stringsAsFactors = FALSE)
+
+# --- genotype for GAPIT ---
+# dosage is your final QC'd matrix: rows = taxa, cols = SNPs
+stopifnot(is.matrix(dosage))
+
+myGDp <- data.frame(
+  Taxa = rownames(dosage),
+  dosage,
+  check.names = FALSE,
+  stringsAsFactors = FALSE
+)
+
+
+# --- map for GAPIT ---
+myGMp <- data.frame(
+  SNP = colnames(dosage),
+  stringsAsFactors = FALSE,
+  check.names = FALSE
+)
+
+tmp <- strsplit(myGMp$SNP, "_", fixed = TRUE)
+myGMp$Chromosome <- as.integer(sub("^Gm", "", vapply(tmp, `[`, character(1), 1)))
+myGMp$Position   <- as.integer(vapply(tmp, `[`, character(1), 2))
+
+myGMp <- myGMp[, c("SNP", "Chromosome", "Position")]
+
+# --- hard checks ---
+stopifnot(!anyDuplicated(myYp$Taxa))
+stopifnot(!anyDuplicated(myGDp$Taxa))
+stopifnot(!anyDuplicated(myGMp$SNP))
+
+stopifnot(nrow(myGMp) == ncol(myGDp) - 1)
+stopifnot(identical(myGMp$SNP, colnames(myGDp)[-1]))
+
+# force same taxa order in Y and GD
+keep <- intersect(myYp$Taxa, myGDp$Taxa)
+myYp  <- myYp[match(keep, myYp$Taxa), , drop = FALSE]
+myGDp <- myGDp[match(keep, myGDp$Taxa), , drop = FALSE]
+
+stopifnot(identical(myYp$Taxa, myGDp$Taxa))
+
+```
+
+### Protein GLM GWAS
+
+```{r}
+library(GAPIT)
+
+pglm <- GAPIT(
+  Y = myYp,
+  GD = myGDp,
+  GM = myGMp,
+  model = "GLM",
+  PCA.total = 0,
+  file.output = FALSE
+)
+```
+
+#### Manhattan plot and significant SNPs
+
+```{r}
+library(qqman) 
+pglm$GWAS %>% 
+  manhattan(.,chr = "Chromosome",bp = "Position ",p = "P.value")
+  
+qq(pglm$GWAS$P.value)
+
+### how many snps on each chromosome
+pglmGWASresults<-pglm$GWAS
+as.data.frame(table(pglmGWASresults$Chromosome))
+
+#extract significant SNPs at .01 thershold
+
+bonf_threshold <- .01 / nrow(pglm$GWAS)
+
+# Filter significant SNPs
+pglmsig_snps <- pglmGWASresults[pglmGWASresults$P.value <= bonf_threshold, ]
+
+pglmsig_snps
+```
+
+### Protein MLM GWAS
+
+```{r}
+library(GAPIT)
+
+pmlm <- GAPIT(
+  Y = myYp,
+  GD = myGDp,
+  GM = myGMp,
+  model = "MLM",
+  PCA.total = 0,
+  file.output = FALSE
+)
+```
+
+#### Manhattan plot and significant SNPs
+
+```{r}
+library(qqman) 
+pmlm$GWAS %>% 
+  manhattan(.,chr = "Chromosome",bp = "Position ",p = "P.value")
+  
+qq(pmlm$GWAS$P.value)
+
+### how many snps on each chromosome
+pmlmGWASresults<-pmlm$GWAS
+as.data.frame(table(pmlmGWASresults$Chromosome))
+
+#extract significant SNPs at .01 thershold
+
+bonf_threshold <- .01 / nrow(pmlm$GWAS)
+
+# Filter significant SNPs
+pmlmsig_snps <- pmlmGWASresults[pmlmGWASresults$P.value <= bonf_threshold, ]
+
+pmlmsig_snps
+```
+
+### Protein MLMM GWAS
+
+```{r}
+library(GAPIT)
+
+pmlmm <- GAPIT(
+  Y = myYp,
+  GD = myGDp,
+  GM = myGMp,
+  model = "MLMM",
+  PCA.total = 0,
+  file.output = FALSE
+)
+```
+
+#### Manhattan plot and significant SNPs
+
+```{r}
+library(qqman) 
+pmlmm$GWAS %>% 
+  manhattan(.,chr = "Chr",bp = "Pos",p = "P.value")
+  
+qq(pmlmm$GWAS$P.value)
+
+### how many snps on each chromosome
+pmlmmGWASresults<-pmlmm$GWAS
+as.data.frame(table(pmlmmGWASresults$Chr))
+
+#extract significant SNPs at .01 thershold
+
+bonf_threshold <- .01 / nrow(pmlmm$GWAS)
+
+# Filter significant SNPs
+pmlmmsig_snps <- pmlmmGWASresults[pmlmmGWASresults$P.value <= bonf_threshold, ]
+
+pmlmmsig_snps
+```
+
+### Protein FarmCPU GWAS
+
+```{r}
+library(GAPIT)
+
+pcpu <- GAPIT(
+  Y = myYp,
+  GD = myGDp,
+  GM = myGMp,
+  model = "FarmCPU",
+  PCA.total = 0,
+  file.output = FALSE
+)
+```
+
+#### Manhattan plot and significant SNPs
+
+```{r}
+library(qqman) 
+pcpu$GWAS %>% 
+  manhattan(.,chr = "Chromosome",bp = "Position",p = "P.value")
+  
+qq(pcpu$GWAS$P.value)
+
+### how many snps on each chromosome
+pcpuGWASresults<-pcpu$GWAS
+as.data.frame(table(pcpuGWASresults$Chromosome))
+
+#extract significant SNPs at .01 thershold
+
+bonf_threshold <- .05 / nrow(pcpu$GWAS)
+
+# Filter significant SNPs
+pcpusig_snps <- pcpuGWASresults[pcpuGWASresults$P.value <= bonf_threshold, ]
+
+pcpusig_snps
+```
+
+### Oil GWAS prep
+
+```{r}
+wholedata<-read.csv("~/Orrie/Class Materials/genomic proposal_files/trimmedpheno.csv" , na.strings = c(NA,"."))
+
+
+snps<-read_delim(("C:/Users/otf0002/Downloads/SoyNAM parents+progeny 4312 SNP genotypes Wm82 (5).a2"),na = "-") %>% 
+  select(-dbSNP_ID,-Chr_Wm82.a2,-Position_Wm82.a2) %>% 
+  column_to_rownames(var = "DEPRECATED-BARCSOYNAMSNP6K_ID")
+dosage<-snps %>%
+  mutate(across(.cols=everything(),
+                ~ ifelse(.x=="A","0",
+                         ifelse(.x=="H","1",
+                                ifelse(.x=="B","2",.x))))) 
+sort(unique(unlist(snps)))
+sort(unique(unlist(dosage)))
+any(is.na(dosage))
+sum(is.na(dosage))
+
+# seems there are only 0,1,2 values and missing 
+# which is what we want
+
+dosage<-dosage %>% 
+  mutate(across(everything(),as.numeric)) %>% 
+  as.matrix %>% 
+  t()
+
+
+library(ASRgenomics)
+
+qc <- qc.filtering(M=dosage,
+                   maf         = 0.05, # keep markers with MAF >= 0.01
+                   marker.call = 0.95, # keep SNPs called in >= 95% of indivs
+                   ind.call    = 0.80, # keep individuals with >= 80% SNPs called
+                   imput       = TRUE) # simple mean imputation
+
+dosage<-qc$M.clean
+
+
+
+```
+
+#### Phenotypic data cleaning
+```{r}
+oil_pheno<-wholedata %>%
+  select(-Yld, -Protein) %>%
+  drop_na %>%
+  filter(Strain %in% rownames(dosage))
+
+dosage<-dosage[rownames(dosage) %in% oil_pheno$Strain,]
+
+oil_pheno<-oil_pheno %>% 
+  arrange(Env) %>% 
+  mutate(Env=factor(Env),
+         Strain=factor(Strain,levels=rownames(dosage)))
+
+library(asreml)
+asr_oil<-asreml(Oil ~ Env,
+                 random = ~Strain ,
+                 residual = ~dsum(~units|Env),
+                 data = oil_pheno)
+
+### extract blups
+oilblups<-summary(asr_oil,coef=T)$coef.random  %>%
+  # confert to data.frame
+  as.data.frame %>%
+  # change the rownames to a column the the data.frame
+  rownames_to_column(var = "Strain") %>%
+  # filter to only the BLUPs for the entry main-effect
+  # (output includes all random terms)
+  filter(grepl("^Strain_",Strain)) %>%
+  # for good measure, tidy data,
+  # need to remove a prefix that asreml added to each entry name
+  mutate(Strain=gsub("Strain_","",Strain,fixed = T)) %>%
+  select(-z.ratio, -std.error) %>%
+  relocate(last_col(), .before = 1) %>%
+  rename(Oil = solution)
+
+
+ggsnps_filt_centered<-scale(dosage,scale = F, center = T)
+
+oilblups<-oilblups %>% 
+  mutate(Strain=factor(Strain))
+```
+
+### Format arguments for GAPIT We then format MyY, MyGD, and MyGM in a way that GAPIT is happy with.
+```{r}
+myYo <- oilblups %>%
+  transmute(Taxa = as.character(Strain),
+            Oil  = as.numeric(Oil)) %>%
+  as.data.frame(stringsAsFactors = FALSE)
+
+# --- genotype for GAPIT ---
+# dosage is your final QC'd matrix: rows = taxa, cols = SNPs
+stopifnot(is.matrix(dosage))
+
+myGDo <- data.frame(
+  Taxa = rownames(dosage),
+  dosage,
+  check.names = FALSE,
+  stringsAsFactors = FALSE
+)
+
+
+# --- map for GAPIT ---
+myGMo <- data.frame(
+  SNP = colnames(dosage),
+  stringsAsFactors = FALSE,
+  check.names = FALSE
+)
+
+tmpo <- strsplit(myGMo$SNP, "_", fixed = TRUE)
+myGMo$Chromosome <- as.integer(sub("^Gm", "", vapply(tmpo, `[`, character(1), 1)))
+myGMo$Position   <- as.integer(vapply(tmpo, `[`, character(1), 2))
+
+myGMo <- myGMo[, c("SNP", "Chromosome", "Position")]
+
+# --- hard checks ---
+stopifnot(!anyDuplicated(myYo$Taxa))
+stopifnot(!anyDuplicated(myGDo$Taxa))
+stopifnot(!anyDuplicated(myGMo$SNP))
+
+stopifnot(nrow(myGMo) == ncol(myGDo) - 1)
+stopifnot(identical(myGMo$SNP, colnames(myGDo)[-1]))
+
+# force same taxa order in Y and GD
+keep <- intersect(myYo$Taxa, myGDo$Taxa)
+myYo  <- myYo[match(keep, myYo$Taxa), , drop = FALSE]
+myGDo <- myGDo[match(keep, myGDo$Taxa), , drop = FALSE]
+
+stopifnot(identical(myYo$Taxa, myGDo$Taxa))
+
+```
+
+### Oil GLM GWAS
+```{r}
+library(GAPIT)
+
+oglm <- GAPIT(
+  Y = myYo,
+  GD = myGDo,
+  GM = myGMo,
+  model = "GLM",
+  PCA.total = 0,
+  file.output = FALSE
+)
+```
+
+#### Manhattan and significant SNPs
+
+```{r}
+library(qqman) 
+oglm$GWAS %>% 
+  manhattan(.,chr = "Chromosome",bp = "Position ",p = "P.value")
+  
+qq(oglm$GWAS$P.value)
+
+### how many snps on each chromosome
+oglmGWASresults<-oglm$GWAS
+as.data.frame(table(oglmGWASresults$Chromosome))
+
+#extract significant SNPs at .01 thershold
+
+bonf_threshold <- .05 / nrow(oglm$GWAS)
+
+# Filter significant SNPs
+oglmsig_snps <- oglmGWASresults[oglmGWASresults$P.value <= bonf_threshold, ]
+
+oglmsig_snps
+```
+
+### Oil MLM GWAS
+
+```{r}
+library(GAPIT)
+
+omlm <- GAPIT(
+  Y = myYo,
+  GD = myGDo,
+  GM = myGMo,
+  model = "MLM",
+  PCA.total = 0,
+  file.output = FALSE
+  )
+```
+
+#### Manhattan and significant SNPs
+
+```{r}
+library(qqman) 
+omlm$GWAS %>% 
+  manhattan(.,chr = "Chromosome",bp = "Position ",p = "P.value")
+  
+qq(omlm$GWAS$P.value)
+
+### how many snps on each chromosome
+omlmGWASresults<-omlm$GWAS
+as.data.frame(table(omlmGWASresults$Chromosome))
+
+#extract significant SNPs at .01 thershold
+
+bonf_threshold <- .05 / nrow(omlm$GWAS)
+
+# Filter significant SNPs
+omlmsig_snps <- omlmGWASresults[omlmGWASresults$P.value <= bonf_threshold, ]
+
+omlmsig_snps
+```
+
+### Oil MLMM GWAS
+
+```{r}
+library(GAPIT)
+
+omlmm <- GAPIT(
+  Y = myYo,
+  GD = myGDo,
+  GM = myGMo,
+  model = "MLMM",
+  PCA.total = 0,
+  file.output = FALSE
+  )
+```
+
+#### Manhattan and significant SNPs
+
+```{r}
+library(qqman) 
+omlmm$GWAS %>% 
+  manhattan(.,chr = "Chr",bp = "Pos",p = "P.value")
+  
+qq(omlmm$GWAS$P.value)
+
+### how many snps on each chromosome
+omlmmGWASresults<-omlmm$GWAS
+as.data.frame(table(omlmmGWASresults$Chr))
+
+#extract significant SNPs at .01 thershold
+
+bonf_threshold <- .05 / nrow(omlmm$GWAS)
+
+# Filter significant SNPs
+omlmmsig_snps <- omlmmGWASresults[omlmmGWASresults$P.value <= bonf_threshold, ]
+
+omlmmsig_snps
+```
+
+### Oil FarmCPU GWAS
+
+```{r}
+library(GAPIT)
+
+ocpu <- GAPIT(
+  Y = myYo,
+  GD = myGDo,
+  GM = myGMo,
+  model = "FarmCPU",
+  PCA.total = 0,
+  file.output = FALSE
+  )
+```
+
+#### Manhattan and significant SNPs
+
+```{r}
+library(qqman) 
+ocpu$GWAS %>% 
+  manhattan(.,chr = "Chromosome",bp = "Position",p = "P.value")
+  
+qq(ocpu$GWAS$P.value)
+
+### how many snps on each chromosome
+ocpuGWASresults<-ocpu$GWAS
+as.data.frame(table(ocpuGWASresults$Chromosome))
+
+#extract significant SNPs at .01 thershold
+
+bonf_threshold <- .05 / nrow(ocpu$GWAS)
+
+# Filter significant SNPs
+ocpusig_snps <- ocpuGWASresults[ocpuGWASresults$P.value <= bonf_threshold, ]
+
+ocpusig_snps
+```
+
+## Conclusions and Biological Significance
+
+For our GWAS analysis on yield, we found 21 total significant SNPS and four  significant SNPs across the MLM and MLMM models. The four significant SNPs were For the protein GWAS, the same two SNPs were found using GLM. MLM, and MLMM models. These four SNPs from yield and two SNPs from protein are ideal candidates for further validation and analysis since they were detected in multiple models. After further validation, these SNPs can be integrated into MAS or GS pipelines to improve selection accuracy and genetic gain in soybean breeding programs.
+
+No significant SNPs were detected from any model using oil phenotypic data, and only two SNPs were detected in protein. This could be due to the smaller phenotypic data set that was available for these traits relative to yield or because of the limited size of the SNP data set. The use of 50k chip and the collection of more phenotypic data for these traits would likely provide higher resolution, more accurate results, and identify more significant SNPs.
+
+
+
+# Genomic Prediction and Selection
+
+## Genomic Selection Background
+
+Genomic prediciton and selection (GS) rely on a variety of statistical approaches to build models and predict phenotypic data for individuals using genotypic data from a training population. The prediction model based on the training population must be generalizeable to later generations in that population to be useful, so multiple models and methods have been adapted to reduce overfitting and accomplish this goal. In brief, n-fold cross validation is performed when the entire population is split into two random groups containing different individuals from the population. One is smaller and contains the test individuals, while the larger group contains the individuals that the model is trained on. The model built on the larger data set is then used to predict the value of the test data set. The predicted values are then compared to the actual values, and the correlation between predicted and observed data produces the prediction accuracy of that model. 
+
+Bayesian models have also been used to create test and train populations and determine prediction accuracy. In this part of the project, we create 10-fold G-BLUP cross validation models, genetic relationship matrices, and Bayesian models and determine the ability of these models to predict accuracy for yield, oil, and protein. The models are supplied with phenotypic and genotypic data, and the entire population is broken into a training (80% of data) and test (20% of data) group that is consistently used for all models. GEBVs from the top 10 lines for each trait were extracted from the best performing model, and superior lines will be used in future breeding.
+
+## Data Analysis
+
+## Yield Models Code
+We first downloaded, filtered, and cleaned our genotypic data to be used in the analysis.
+```{r}
+library(tidyverse)
+library(tidyr)
+library(lme4)
+
+snps<-read_delim(("C:/Users/otf0002/Downloads/SoyNAM parents+progeny 4312 SNP genotypes Wm82 (5).a2"),na = "-") %>% 
+  select(-dbSNP_ID,-Chr_Wm82.a2,-Position_Wm82.a2) %>% 
+  column_to_rownames(var = "DEPRECATED-BARCSOYNAMSNP6K_ID")
+dosage<-snps %>%
+  mutate(across(.cols=everything(),
+                ~ ifelse(.x=="A","0",
+                         ifelse(.x=="H","1",
+                                ifelse(.x=="B","2",.x))))) 
+sort(unique(unlist(snps)))
+sort(unique(unlist(dosage)))
+any(is.na(dosage))
+sum(is.na(dosage))
+
+# seems there are only 0,1,2 values and missing 
+# which is what we want
+
+dosage<-dosage %>% 
+  mutate(across(everything(),as.numeric)) %>% 
+  as.matrix %>% 
+  t()
+
+library(ASRgenomics)
+
+qc <- qc.filtering(M=dosage,
+                   maf         = 0.05, # keep markers with MAF >= 0.01
+                   marker.call = 0.95, # keep SNPs called in >= 95% of indivs
+                   ind.call    = 0.80, # keep individuals with >= 80% SNPs called
+                   imput       = TRUE) # simple mean imputation
+
+## Used code below to clean matrix to whole SNP values of 0, 1, or 2. The GS models seemed to work much better when this was done.
+
+
+gen <- qc$M[, -1]
+
+gen_mat <- as.matrix(qc$M)
+mode(gen_mat) <- "numeric"
+
+gen_mat <- round(gen_mat)
+gen_mat[gen_mat < 0] <- 0
+gen_mat[gen_mat > 2] <- 2
+
+
+all(is.na(gen_mat) | gen_mat %in% c(0,1,2))
+
+dosage<-gen_mat
+```
+
+### Phenotypic data and BLUE extraction
+Since we don't want to BLUP twice, we extracted BLUEs for each strain using asreml and Strain as a fixed effect.
+```{r}
+
+wholedata<-read.csv("~/Orrie/Class Materials/genomic proposal_files/trimmedpheno.csv" , na.strings = c(NA,"."))
+
+yld_pheno<-wholedata %>%
+  select(-Oil, -Protein) %>%
+  drop_na %>%
+  filter(Strain %in% rownames(dosage))
+
+dosage<-dosage[rownames(dosage) %in% yld_pheno$Strain,]
+
+yld_pheno<-yld_pheno %>% 
+  arrange(Env) %>% 
+  mutate(Env=factor(Env),
+         Strain=factor(Strain,levels=rownames(dosage)))
+
+
+library(asreml)
+
+asr_yldblue<-asreml(Yld ~ Env + Strain ,
+                    residual = ~dsum(~units|Env),
+                    data = yld_pheno,
+                    maxiter = 15,
+                    workspace = "800mb")
+
+### Extract BLUEs
+
+yldblues <- predict(asr_yldblue, classify="Strain", workspace = "800mb", pworkspace = "2000mb")$pvals
+
+yldblues<-yldblues %>% rename(Yld = predicted.value) %>% select(-std.error, -status)
+
+yld_pheno<-yldblues
+
+
+ggsnps_filt_centered<-scale(dosage,scale = F, center = T)
+
+
+library("sommer")
+
+yld_pheno<-yld_pheno %>% 
+  mutate(Strain=factor(Strain))
+```
+
+
+###Filtering and expanding marker matrix
+We tehn made a marker matrix that could be used in RR-BLUP.
+```{r}
+# Re-order the marker matrix to match genotype levels in the data
+M<-ggsnps_filt_centered[levels(yld_pheno$Strain),]
+
+##hard check
+all(rownames(M) == levels(yld_pheno$Strain))
+
+
+Z <- model.matrix(~ 0 + Strain, data = yld_pheno)
+
+# Make expanded marker matrix for observation-level RR-BLUP
+ZM <- Z %*% M
+```
+
+###RR-BLUP
+We then used our data and marker matrix to fit a ridge-regression BLUP. We also looked at the distribution of SNP effect sizes, extracted GEBVs, and assessed the predictive ability of the model.
+```{r}
+library(conflicted)
+conflicts_prefer(dplyr::select)
+conflicts_prefer(dplyr::filter)
+
+## rrBLUP
+fit_rry <- mmes(Yld~1,
+                random = ~vsm(ism(ZM), buildGu = FALSE), 
+                nIters = 5, 
+                # putting buildGu=FALSE is part of the secret sauce 
+                ## avoiding a seriously computational burden involving matrices of dimension p by p.
+                data=yld_pheno)
+
+### SNP effects
+
+snp_effects_table<-fit_rry$u %>% 
+  as.data.frame %>% 
+  rownames_to_column(var = "SNP_ID") %>% 
+  separate(col = SNP_ID,
+           into = c("Chr","Pos","Allele1","Allele2"),
+           sep = "_",remove = F) %>% 
+  mutate(Pos=as.numeric(Pos),
+         Chr=factor(Chr,levels=1:18)) %>% 
+  rename(SNPeffect=V1)
+
+fit_rry$u %>% hist(.,main="Distribution of SNP-effects predicted by RR-BLUP")
+
+## hard checks
+table(colnames(ggsnps_filt_centered)==rownames(fit_rry$u))
+
+all(colnames(ggsnps_filt_centered) == rownames(fit_rry$u))
+
+### extract GEBVs by multiply SNP matrix against SNP-effects
+gy<-ggsnps_filt_centered %*% fit_rry$u
+
+dim(gy)
+
+
+gy %>% head
+
+summary(gy %>% as.vector)
+
+### Prediction ability
+
+cor(gy[as.character(yld_pheno$Strain), 1], yld_pheno$Yld, use='complete.obs')
+```
+
+###GBLUP
+We then made a matrix that was recoded as -1, 0, and 1 to work in the sommer package, added a ridge, and ran a GBLUP model using asreml.
+```{r}
+### GGBLUP
+
+A<-A.mat(dosage-1)
+
+summary(diag(A))
+
+dim(A)
+
+library(matrixcalc)
+
+##added ridge to GRM
+A<-A+diag(1e-6,nrow(A))
+is.positive.definite(A)
+
+yld_pheno<-yld_pheno %>% 
+  mutate(Strain=factor(Strain,levels=rownames(A)))
+
+fit_gblupy<-asreml(fixed     = Yld~1,
+                   random    = ~vm(Strain,Ao),
+                   data      = yld_pheno,
+                   maxiter = 15,
+                   workspace = "800mb")
+
+
+gblupy <- summary(fit_gblupy, coef = TRUE)$coef.random
+
+gblup_dfy <- summary(fit_gblupy, coef = TRUE)$coef.random %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "Strain") %>%
+  mutate(Strain = sub("^vm\\(Strain, Ao\\)_", "", Strain)) %>%
+  rename(GEBV = solution)
+
+dfy <- merge(yld_pheno, gblup_dfy, by = "Strain")
+
+cor(dfy$Yld, dfy$GEBV, use = "complete.obs")
+```
+
+### Basic Cross-validation
+After verifying that the model accuracy was as expected in the basic models, we moved on to a simple cross validation in which the data was split into a training data set containing 80% of the total data, and a test set containing 20% of the data. 
+```{r}
+
+
+## split data and create test and train data sets
+strains<-unique(as.character(yld_pheno$Strain))
+set.seed(123);
+test_strainsy<-sample(strains,size = 0.2*length(strains),replace = F)
+train_strainsy<-strains[!strains %in% test_strainso]
+
+# Subset the phenos to only training set
+train_phenosy<-yld_pheno %>% 
+  filter(Strain %in% train_strainsy) %>% 
+  mutate(Strain=factor(Strain,levels=rownames(Ao)))
+# Notice we aren't going to modify the kinship matrix A
+# It still contains ALL individuals
+# And while only 4/5 of individuals are in training phenos, 
+# we assigned levels=rownames(A)
+## Internally, asreml will know to construct a model predicting all levels
+
+trn_mody<-asreml(fixed     = Yld~1,
+                 random    = ~vm(Strain,Ao),
+                 data      = train_phenosy,
+                 maxiter = 15,
+                 workspace = "800mb")
+
+tst_gebvsy<-summary(trn_mody,coef=T)$coef.random %>% 
+  as.data.frame %>% 
+  rownames_to_column(var = "Strain") %>% 
+  mutate(Strain=gsub("vm(Strain, Ao)_","",Strain,fixed = T)) %>% 
+  filter(Strain %in% test_strainsy)
+
+
+tst_gebvsy<-tst_gebvsy %>% 
+  left_join(yld_pheno %>% 
+              filter(Strain %in% test_strainsy) %>% 
+              dplyr::select(Strain,Yld))
+
+
+cor(tst_gebvsy$solution,tst_gebvsy$Yld)
+```
+
+###Simple Data Split and 5 fold cross validation
+```{r}
+### single cross validation step to verify model runs
+
+yldblups<-yld_pheno
+
+library(tidyverse)
+library(rsample)
+# First, let's set a few parameters
+## These will become input arguments to a function we will build
+seed<-123; # for repeatability
+nrepeats<-1 # number of iterations
+nfolds<-5 # number of folds for k-fold cross-validation
+strains<-unique(yld_pheno$Strain)
+blups<-yld_pheno
+trait<-"Yld"
+
+
+require(rsample)
+
+# Trick to make the whole set of cross validation repeatable
+# The input "seed" is a master "seed" that makes seeds for the rest of the process
+set.seed(seed); 
+seeds<-sample(1:10000,replace = F,size=nrepeats)
+
+# Make a list of training-testing splits spanning the number of iterations we want to do  
+cvsamples<-tibble(repeats=1:nrepeats,
+                  seeds=seeds)
+
+# For each repeat, us the `vfold_cv` function in rsample 
+#### to make train-test splits for k-fold cross-validation   
+cvsamples<-cvsamples %>% 
+  mutate(splits=map(seeds,function(seeds,...){
+    set.seed(seeds);
+    cvfolds<-vfold_cv(tibble(Strain=strains),v = nfolds)
+    return(cvfolds)}))
+
+cvsamples<-cvsamples %>% 
+  unnest(splits)
+
+# Watch what happens if we use the rsample functions "training()" and "testing()"
+training(cvsamples$splits[[1]])
+testing(cvsamples$splits[[1]])
+
+
+data<-blups
+splits<-cvsamples$splits[[1]]
+# --------------
+
+crossVal_onesplito <- function(splits, data, trait){
+  # Subset the data to training individuals only
+  # Use the training() rsample function 
+  trainingdata <- data %>%
+    dplyr::filter(Strain %in% training(splits)$Strain) %>%
+    dplyr::mutate(Strain = factor(Strain, levels = rownames(Ao)))
+  # We're doing a GBLUP model.
+  # You can set-up whatever you want though.
+  fit<-asreml(fixed     = as.formula(paste0(trait,"~1")),
+              random    = ~vm(Strain,Ao),
+              data      = trainingdata,
+              workspace = "800mb")
+  # Extract the GEBVs 
+  gpreds <-summary(fit, coef = TRUE)$coef.random %>%
+    as.data.frame() %>%
+    rownames_to_column(var = "Strain") %>%
+    dplyr::mutate(Strain = gsub("vm(Strain, Ao)_", "", Strain, fixed = T))
+  # Only the test-set's GEBVs are wanted for measuring accuracy
+  gpreds_testsetOnly <- gpreds %>%
+    filter(Strain %in% testing(splits)$Strain)
+  # return predictions for testset individuals
+  return(tibble(gpreds_testsetOnly = list(gpreds_testsetOnly)))
+}
+
+cvsamples<-cvsamples %>% 
+  mutate(CVresults=map(splits,~crossVal_onesplito(splits = ., 
+                                                  data=blups, trait=trait)))
+
+cvsamples<-cvsamples %>% 
+  dplyr::select(-splits) %>% 
+  unnest(CVresults) %>% 
+  unnest(gpreds_testsetOnly) %>% 
+  # merge the blups to the predictions
+  left_join(blups, by = "Strain")
+# Use group_by() + summarize() function to compute the cor(PRED,OBS) 
+#### seperately for each _iteration_ (repeat)
+accuracies<-cvsamples %>% 
+  dplyr::select(repeats,id,Strain,solution,trait) %>% 
+  group_by(repeats) %>% 
+  summarize(accuracy=cor(solution,get(trait),use='complete.obs'))
+
+accuracies
+
+```
+
+###Entire 10-fold cross validation function and results
+```{r}
+crossValy<-function(seed, nrepeats, nfolds, strains, blups, trait){
+  
+  require(rsample)
+  
+  # Trick for make the whole set of cross validation repeatable
+  # The input "seed" is a master "seed" that makes seeds for the rest of the process
+  set.seed(seed); 
+  seeds<-sample(1:10000,replace = F,size=nrepeats)
+  
+  # Make a list of training-testing splits spanning the number of iterations we want to do  
+  cvsamples<-tibble(repeats=1:nrepeats,
+                    seeds=seeds)
+  
+  # For each repeat, us the `vfold_cv` function in rsample 
+  #### to make train-test splits for k-fold cross-validation   
+  
+  cvsamples<-cvsamples %>% 
+    mutate(splits=map(seeds,function(seeds,...){
+      set.seed(seeds);
+      cvfolds<-vfold_cv(tibble(Strain=strains),v = nfolds)
+      return(cvfolds)}))
+  
+  cvsamples<-cvsamples %>% 
+    unnest(splits)
+  
+  
+  
+  crossVal_onesplit <- function(splits, data, trait){
+    # Subset the data to training individuals only
+    # Use the training() rsample function 
+    trainingdata <- data %>%
+      dplyr::filter(Strain %in% training(splits)$Strain) %>%
+      dplyr::mutate(Strain = factor(Strain, levels = rownames(Ao)))
+    # We're doing a GBLUP model.
+    # You can set-up whatever you want though.
+    fit<-asreml(fixed     = as.formula(paste0(trait,"~1")),
+                random    = ~vm(Strain,Ao),
+                data      = trainingdata,
+                workspace = "800mb")
+    # Extract the GEBVs 
+    gpreds <-summary(fit, coef = TRUE)$coef.random %>%
+      as.data.frame() %>%
+      rownames_to_column(var = "Strain") %>%
+      dplyr::mutate(Strain = gsub("vm(Strain, Ao)_", "", Strain, fixed = T))
+    # Only the test-set's GEBVs are wanted for measuring accuracy
+    gpreds_testsetOnly <- gpreds %>%
+      filter(Strain %in% testing(splits)$Strain)
+    # return predictions for testset individuals
+    return(tibble(gpreds_testsetOnly = list(gpreds_testsetOnly)))
+  }
+  
+  
+  cvsamples<-cvsamples %>% 
+    mutate(CVresults=map(splits,~crossVal_onesplit(splits = ., 
+                                                   data=blups, trait=trait)))
+  
+  cvsamples<-cvsamples %>% 
+    dplyr::select(-splits) %>% 
+    unnest(CVresults) %>% 
+    unnest(gpreds_testsetOnly) %>% 
+    # merge the blups to the predictions
+    left_join(blups, by = "Strain")
+  # Use group_by() + summarize() function to compute the cor(PRED,OBS) 
+  #### seperately for each _iteration_ (repeat)
+  accuracies<-cvsamples %>% 
+    dplyr::select(repeats,id,Strain,solution,trait) %>% 
+    group_by(repeats) %>% 
+    summarize(accuracy=cor(solution,get(trait),use='complete.obs'))
+  
+  return(accuracies)
+  
+}
+
+cvresults<-crossValy(seed=123,nrepeats=3, nfolds=10, 
+                     strains=unique(yldblues$Strain), blups=yldblups, trait="Yld")
+
+cvresults
+
+```
+
+
+### Bayesian mMdels Using BGLR
+Finally, we wanted to test multiple Bayesian models to determine which gave the highest prediction accuracy for our data set.
+```{r}
+## data splitting and cleaning
+strains<-unique(as.character(yld_pheno$Strain))
+set.seed(123);
+test_strainsy<-sample(strains,size = 0.2*length(strains),replace = F)
+train_strainsy<-strains[!strains %in% test_strainsy]
+
+oil_pheno$Strain <- as.character(yld_pheno$Strain)
+
+# Keep only strains with genotypes
+common_ids <- intersect(yld_pheno$Strain, rownames(dosage))
+
+#Make sure aligned
+yld_pheno <- yld_pheno[yld_pheno$Strain %in% common_ids, ]
+dosage <- dosage[common_ids, ]
+
+##Reorder genotype matrix to match phenotype
+dosage <- dosage[yld_pheno$Strain, ]
+
+## Create train/test index
+train_idx <- which(yld_pheno$Strain %in% train_strainsy)
+test_idx  <- which(yld_pheno$Strain %in% test_strainsy)
+
+### Mask test set
+y <- yld_pheno$Yld
+y[test_idx] <- NA   # THIS is key for BGLR
+
+library(BGLR)
+
+# Build genomic relationship matrix
+Z <- scale(dosage, center = TRUE, scale = FALSE)
+G <- tcrossprod(Z) / ncol(Z)
+```
+
+### Bayes GBLUP
+```{r}
+fitbgblupy <- BGLR(
+  y = y,
+  ETA = list(list(K = G, model = "RKHS")),  # GBLUP via kernel
+  nIter = 12000,
+  burnIn = 2000,
+  verbose = TRUE
+)
+
+### Extract predictions
+yhatbgblup <- fitbgblupy$yHat
+
+### Compute prediction accuracy
+
+bgblupyldac<-cor(yhatbgblup[test_idx], yld_pheno$Yld[test_idx], use = "complete.obs")
+cor(yhatbgblup[test_idx], yld_pheno$Yld[test_idx], use = "complete.obs")
+```
+
+### Bayes B
+```{r}
+fit_bayesBy <- BGLR(
+  y = y,
+  ETA = list(list(X = dosage, model = "BayesB")),
+  nIter = 12000,
+  burnIn = 2000,
+  
+)
+
+yhatbb <- fit_bayesBy$yHat
+
+### Compute prediction accuracy
+
+bbyld<-cor(yhatbb[test_idx], yld_pheno$Yld[test_idx], use = "complete.obs")
+cor(yhatbb[test_idx], yld_pheno$Yld[test_idx], use = "complete.obs")
+
+###extract gebvs
+gebv_testyldbb <- fit_bayesB$yHat[test_idx]
+
+# get corresponding strain IDs
+strain_ids <- rownames(dosage)[test_idx]
+
+# combine into a data frame
+gebvs_yldbb <- data.frame(
+  Strain = strain_ids,
+  GEBV = gebv_testyldbb
+)
+
+##sort and extract top 10 stains with GEBVs
+
+library(dplyr)
+
+top10strainsyld <- gebvs_yldbb %>%
+  arrange(desc(GEBV)) %>%
+  slice(1:10)
+
+
+```
+
+
+
+### Bayes Lasso
+```{r}
+fitbly <- BGLR(
+  y = y,
+  ETA = list(list(X = dosage, model = "BL")),  # Bayes Lasso
+  nIter = 12000,
+  burnIn = 2000
+)
+
+yhatbl <- fitbly$yHat
+
+### Compute prediction accuracy
+
+blyld<-cor(yhatbl[test_idx], yld_pheno$Yld[test_idx], use = "complete.obs")
+cor(yhatbl[test_idx], yld_pheno$Yld[test_idx], use = "complete.obs")
+```
+Based on the results of the Bayesian models, we were able to select the model with the highest prediction accuracy and extract the GEBVs produced by that model. The GEBVs were sorted from highest to lowest, and the strains with the  highest 10 GEBVs for yield were identified. These strains have both phenotypic data and genotypic data to support their use as parents in future breeding.
+
+
+
+
+##Oil Models
+Downloaded, filtered, and cleaned our genotypic data to be used for oil.
+```{r}
+library(tidyverse)
+library(tidyr)
+library(lme4)
+
+snps<-read_delim(("C:/Users/otf0002/Downloads/SoyNAM parents+progeny 4312 SNP genotypes Wm82 (5).a2"),na = "-") %>% 
+  select(-dbSNP_ID,-Chr_Wm82.a2,-Position_Wm82.a2) %>% 
+  column_to_rownames(var = "DEPRECATED-BARCSOYNAMSNP6K_ID")
+dosage<-snps %>%
+  mutate(across(.cols=everything(),
+                ~ ifelse(.x=="A","0",
+                         ifelse(.x=="H","1",
+                                ifelse(.x=="B","2",.x))))) 
+sort(unique(unlist(snps)))
+sort(unique(unlist(dosage)))
+any(is.na(dosage))
+sum(is.na(dosage))
+
+# seems there are only 0,1,2 values and missing 
+# which is what we want
+
+dosage<-dosage %>% 
+  mutate(across(everything(),as.numeric)) %>% 
+  as.matrix %>% 
+  t()
+
+library(ASRgenomics)
+
+qc <- qc.filtering(M=dosage,
+                   maf         = 0.05, # keep markers with MAF >= 0.01
+                   marker.call = 0.95, # keep SNPs called in >= 95% of indivs
+                   ind.call    = 0.80, # keep individuals with >= 80% SNPs called
+                   imput       = TRUE) # simple mean imputation
+
+## Used code below to clean matrix to whole SNP values of 0, 1, or 2. The GS models seemed to work much better when this was done.
+
+
+geno <- qc$M[, -1]
+
+geno_mat <- as.matrix(qc$M)
+mode(geno_mat) <- "numeric"
+
+geno_mat <- round(geno_mat)
+geno_mat[geno_mat < 0] <- 0
+geno_mat[geno_mat > 2] <- 2
+
+
+all(is.na(geno_mat) | geno_mat %in% c(0,1,2))
+
+dosage<-geno_mat
+```
+
+### Phenotypic data and BLUE extraction
+Since we don't want to BLUP twice, we extracted BLUEs for each strain using asreml and Strain as a fixed effect.
+```{r}
+
+wholedata<-read.csv("~/Orrie/Class Materials/genomic proposal_files/trimmedpheno.csv" , na.strings = c(NA,"."))
+
+oil_pheno<-wholedata %>%
+  select(-Yld, -Protein) %>%
+  drop_na %>%
+  filter(Strain %in% rownames(dosage))
+
+dosage<-dosage[rownames(dosage) %in% oil_pheno$Strain,]
+
+oil_pheno<-oil_pheno %>% 
+  arrange(Env) %>% 
+  mutate(Env=factor(Env),
+         Strain=factor(Strain,levels=rownames(dosage)))
+
+
+library(asreml)
+
+asr_oilblue<-asreml(Oil ~ Env + Strain ,
+                    residual = ~dsum(~units|Env),
+                    data = oil_pheno,
+                    maxiter = 15,
+                    workspace = "800mb")
+
+### Extract BLUEs
+
+oilblues <- predict(asr_oilblue, classify="Strain", workspace = "800mb", pworkspace = "2000mb")$pvals
+
+oilblues<-oilblues %>% rename(Oil = predicted.value) %>% select(-std.error, -status)
+
+oil_pheno<-oilblues
+
+
+ggsnps_filt_centered<-scale(dosage,scale = F, center = T)
+
+
+library("sommer")
+
+oil_pheno<-oil_pheno %>% 
+  mutate(Strain=factor(Strain))
+```
+
+###Filtering and expanding marker matrix
+
+```{r}
+# Re-order the marker matrix to match genotype levels in the data
+M<-ggsnps_filt_centered[levels(oil_pheno$Strain),]
+
+##hard check
+all(rownames(M) == levels(oil_pheno$Strain))
+
+
+Z <- model.matrix(~ 0 + Strain, data = oil_pheno)
+
+# Make expanded marker matrix for observation-level RR-BLUP
+ZM <- Z %*% M
+```
+
+###RR-BLUP
+We then used our data to fit a ridge-regression BLUP
+```{r}
+library(conflicted)
+conflicts_prefer(dplyr::select)
+conflicts_prefer(dplyr::filter)
+
+## rrBLUP
+fit_rro <- mmes(Oil~1,
+                random = ~vsm(ism(ZM), buildGu = FALSE), 
+                nIters = 5, 
+                # putting buildGu=FALSE is part of the secret sauce 
+                ## avoiding a seriously computational burden involving matrices of dimension p by p.
+                data=oil_pheno)
+
+### SNP effects
+
+fit_rro$u %>% hist(.,main="Distribution of SNP-effects predicted by RR-BLUP")
+
+snp_effects_table<-fit_rro$u %>% 
+  as.data.frame %>% 
+  rownames_to_column(var = "SNP_ID") %>% 
+  separate(col = SNP_ID,
+           into = c("Chr","Pos","Allele1","Allele2"),
+           sep = "_",remove = F) %>% 
+  mutate(Pos=as.numeric(Pos),
+         Chr=factor(Chr,levels=1:18)) %>% 
+  rename(SNPeffect=V1)
+
+## hard checks
+table(colnames(ggsnps_filt_centered)==rownames(fit_rro$u))
+
+all(colnames(ggsnps_filt_centered) == rownames(fit_rro$u))
+
+### extract GEBVs by multiply SNP matrix against SNP-effects
+go<-ggsnps_filt_centered %*% fit_rro$u
+
+dim(go)
+
+
+go %>% head
+
+summary(go %>% as.vector)
+
+### Prediction accuracy
+
+cor(go[as.character(oil_pheno$Strain), 1], oil_pheno$Oil, use='complete.obs')
+```
+
+###GBLUP
+We then made a matrix, added a ridge, and ran a GBLUP model using asreml.
+```{r}
+### GBLUP
+
+Ao<-A.mat(dosage-1)
+
+summary(diag(Ao))
+
+dim(Ao)
+
+library(matrixcalc)
+
+##added ridge
+Ao<-Ao+diag(1e-6,nrow(Ao))
+is.positive.definite(Ao)
+
+oil_pheno<-oil_pheno %>% 
+  mutate(Strain=factor(Strain,levels=rownames(Ao)))
+
+fit_gblupo<-asreml(fixed     = Oil~1,
+                   random    = ~vm(Strain,Ao),
+                   data      = oil_pheno,
+                   maxiter = 15,
+                   workspace = "800mb")
+
+
+gblup <- summary(fit_gblupo, coef = TRUE)$coef.random
+
+gblup_df <- summary(fit_gblupo, coef = TRUE)$coef.random %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "Strain") %>%
+  mutate(Strain = sub("^vm\\(Strain, Ao\\)_", "", Strain)) %>%
+  rename(GEBV = solution)
+
+df <- merge(oil_pheno, gblup_df, by = "Strain")
+
+cor(df$Oil, df$GEBV, use = "complete.obs")
+```
+
+
+### Basic Cross-validation
+After verifying that the model accuracy was as expected in the basic models, we moved on to a simple cross validation in which the data was split into a training data set containing 80% of the total data, and a test set containing 20% of the data. 
+```{r}
+
+
+## split data and create test and train data sets
+strains<-unique(as.character(oil_pheno$Strain))
+set.seed(123);
+test_strainso<-sample(strains,size = 0.2*length(strains),replace = F)
+train_strainso<-strains[!strains %in% test_strainso]
+
+# Subset the phenos to only training set
+train_phenoso<-oil_pheno %>% 
+  filter(Strain %in% train_strainso) %>% 
+  mutate(Strain=factor(Strain,levels=rownames(Ao)))
+# Notice we aren't going to modify the kinship matrix A
+# It still contains ALL individuals
+# And while only 4/5 of individuals are in training phenos, 
+# we assigned levels=rownames(A)
+## Internally, asreml will know to construct a model predicting all levels
+
+trn_modo<-asreml(fixed     = Oil~1,
+                 random    = ~vm(Strain,Ao),
+                 data      = train_phenoso,
+                 maxiter = 15,
+                 workspace = "800mb")
+
+tst_gebvso<-summary(trn_modo,coef=T)$coef.random %>% 
+  as.data.frame %>% 
+  rownames_to_column(var = "Strain") %>% 
+  mutate(Strain=gsub("vm(Strain, Ao)_","",Strain,fixed = T)) %>% 
+  filter(Strain %in% test_strainso)
+
+
+tst_gebvso<-tst_gebvso %>% 
+  left_join(oil_pheno %>% 
+              filter(Strain %in% test_strainso) %>% 
+              dplyr::select(Strain,Oil))
+
+
+cor(tst_gebvso$solution,tst_gebvso$Oil)
+```
+
+
+###Simple Data Split and 5 fold cross validation
+```{r}
+### single cross validation step to verify model runs
+
+oilblups<-oil_pheno
+
+library(tidyverse)
+library(rsample)
+# First, let's set a few parameters
+## These will become input arguments to a function we will build
+seed<-123; # for repeatability
+nrepeats<-1 # number of iterations
+nfolds<-5 # number of folds for k-fold cross-validation
+strains<-unique(oil_pheno$Strain)
+blups<-oil_pheno
+trait<-"Oil"
+
+
+require(rsample)
+
+# Trick to make the whole set of cross validation repeatable
+# The input "seed" is a master "seed" that makes seeds for the rest of the process
+set.seed(seed); 
+seeds<-sample(1:10000,replace = F,size=nrepeats)
+
+# Make a list of training-testing splits spanning the number of iterations we want to do  
+cvsamples<-tibble(repeats=1:nrepeats,
+                  seeds=seeds)
+
+# For each repeat, us the `vfold_cv` function in rsample 
+#### to make train-test splits for k-fold cross-validation   
+cvsamples<-cvsamples %>% 
+  mutate(splits=map(seeds,function(seeds,...){
+    set.seed(seeds);
+    cvfolds<-vfold_cv(tibble(Strain=strains),v = nfolds)
+    return(cvfolds)}))
+
+cvsamples<-cvsamples %>% 
+  unnest(splits)
+
+# Watch what happens if we use the rsample functions "training()" and "testing()"
+training(cvsamples$splits[[1]])
+testing(cvsamples$splits[[1]])
+
+
+data<-blups
+splits<-cvsamples$splits[[1]]
+# --------------
+
+crossVal_onesplito <- function(splits, data, trait){
+  # Subset the data to training individuals only
+  # Use the training() rsample function 
+  trainingdata <- data %>%
+    dplyr::filter(Strain %in% training(splits)$Strain) %>%
+    dplyr::mutate(Strain = factor(Strain, levels = rownames(Ao)))
+  # We're doing a GBLUP model.
+  # You can set-up whatever you want though.
+  fit<-asreml(fixed     = as.formula(paste0(trait,"~1")),
+              random    = ~vm(Strain,Ao),
+              data      = trainingdata,
+              workspace = "800mb")
+  # Extract the GEBVs 
+  gpreds <-summary(fit, coef = TRUE)$coef.random %>%
+    as.data.frame() %>%
+    rownames_to_column(var = "Strain") %>%
+    dplyr::mutate(Strain = gsub("vm(Strain, Ao)_", "", Strain, fixed = T))
+  # Only the test-set's GEBVs are wanted for measuring accuracy
+  gpreds_testsetOnly <- gpreds %>%
+    filter(Strain %in% testing(splits)$Strain)
+  # return predictions for testset individuals
+  return(tibble(gpreds_testsetOnly = list(gpreds_testsetOnly)))
+}
+
+cvsamples<-cvsamples %>% 
+  mutate(CVresults=map(splits,~crossVal_onesplito(splits = ., 
+                                                  data=blups, trait=trait)))
+
+cvsamples<-cvsamples %>% 
+  dplyr::select(-splits) %>% 
+  unnest(CVresults) %>% 
+  unnest(gpreds_testsetOnly) %>% 
+  # merge the blups to the predictions
+  left_join(blups, by = "Strain")
+# Use group_by() + summarize() function to compute the cor(PRED,OBS) 
+#### seperately for each _iteration_ (repeat)
+accuracies<-cvsamples %>% 
+  dplyr::select(repeats,id,Strain,solution,trait) %>% 
+  group_by(repeats) %>% 
+  summarize(accuracy=cor(solution,get(trait),use='complete.obs'))
+
+accuracies
+
+```
+
+###Entire 10-fold cross validation function and results
+```{r}
+crossValo<-function(seed, nrepeats, nfolds, strains, blups, trait){
+  
+  require(rsample)
+  
+  # Trick for make the whole set of cross validation repeatable
+  # The input "seed" is a master "seed" that makes seeds for the rest of the process
+  set.seed(seed); 
+  seeds<-sample(1:10000,replace = F,size=nrepeats)
+  
+  # Make a list of training-testing splits spanning the number of iterations we want to do  
+  cvsamples<-tibble(repeats=1:nrepeats,
+                    seeds=seeds)
+  
+  # For each repeat, us the `vfold_cv` function in rsample 
+  #### to make train-test splits for k-fold cross-validation   
+  
+  cvsamples<-cvsamples %>% 
+    mutate(splits=map(seeds,function(seeds,...){
+      set.seed(seeds);
+      cvfolds<-vfold_cv(tibble(Strain=strains),v = nfolds)
+      return(cvfolds)}))
+  
+  cvsamples<-cvsamples %>% 
+    unnest(splits)
+  
+  
+  
+  crossVal_onesplit <- function(splits, data, trait){
+    # Subset the data to training individuals only
+    # Use the training() rsample function 
+    trainingdata <- data %>%
+      dplyr::filter(Strain %in% training(splits)$Strain) %>%
+      dplyr::mutate(Strain = factor(Strain, levels = rownames(Ao)))
+    # We're doing a GBLUP model.
+    # You can set-up whatever you want though.
+    fit<-asreml(fixed     = as.formula(paste0(trait,"~1")),
+                random    = ~vm(Strain,Ao),
+                data      = trainingdata,
+                workspace = "800mb")
+    # Extract the GEBVs 
+    gpreds <-summary(fit, coef = TRUE)$coef.random %>%
+      as.data.frame() %>%
+      rownames_to_column(var = "Strain") %>%
+      dplyr::mutate(Strain = gsub("vm(Strain, Ao)_", "", Strain, fixed = T))
+    # Only the test-set's GEBVs are wanted for measuring accuracy
+    gpreds_testsetOnly <- gpreds %>%
+      filter(Strain %in% testing(splits)$Strain)
+    # return predictions for testset individuals
+    return(tibble(gpreds_testsetOnly = list(gpreds_testsetOnly)))
+  }
+  
+  
+  cvsamples<-cvsamples %>% 
+    mutate(CVresults=map(splits,~crossVal_onesplit(splits = ., 
+                                                   data=blups, trait=trait)))
+  
+  cvsamples<-cvsamples %>% 
+    dplyr::select(-splits) %>% 
+    unnest(CVresults) %>% 
+    unnest(gpreds_testsetOnly) %>% 
+    # merge the blups to the predictions
+    left_join(blups, by = "Strain")
+  # Use group_by() + summarize() function to compute the cor(PRED,OBS) 
+  #### seperately for each _iteration_ (repeat)
+  accuracies<-cvsamples %>% 
+    dplyr::select(repeats,id,Strain,solution,trait) %>% 
+    group_by(repeats) %>% 
+    summarize(accuracy=cor(solution,get(trait),use='complete.obs'))
+  
+  return(accuracies)
+  
+}
+
+cvresults<-crossValo(seed=123,nrepeats=3, nfolds=10, 
+                     strains=unique(oilblups$Strain), blups=oilblups, trait="Oil")
+
+oiltenfoldacc<-cvresults
+oiltenfoldacc
+```
+
+
+### Bayesian Models Using BGLR
+Finally, we wanted to test multiple Bayesian models to determine which gave the highest prediction accuracy for our data set.
+```{r}
+## data splitting and cleaning
+strains<-unique(as.character(oil_pheno$Strain))
+set.seed(123);
+test_strainso<-sample(strains,size = 0.2*length(strains),replace = F)
+train_strainso<-strains[!strains %in% test_strainso]
+
+oil_pheno$Strain <- as.character(oil_pheno$Strain)
+
+# Keep only strains with genotypes
+common_ids <- intersect(oil_pheno$Strain, rownames(dosage))
+
+#Make sure aligned
+oil_pheno <- oil_pheno[oil_pheno$Strain %in% common_ids, ]
+dosage <- dosage[common_ids, ]
+
+##Reorder genotype matrix to match phenotype
+dosage <- dosage[oil_pheno$Strain, ]
+
+## Create train/test index
+train_idx <- which(oil_pheno$Strain %in% train_strainso)
+test_idx  <- which(oil_pheno$Strain %in% test_strainso)
+
+### Mask test set
+y <- oil_pheno$Oil
+y[test_idx] <- NA   # THIS is key for BGLR
+
+library(BGLR)
+
+# Build genomic relationship matrix
+Z <- scale(dosage, center = TRUE, scale = FALSE)
+G <- tcrossprod(Z) / ncol(Z)
+```
+
+### Bayes GBLUP
+```{r}
+fitbgblup <- BGLR(
+  y = y,
+  ETA = list(list(K = G, model = "RKHS")),  # GBLUP via kernel
+  nIter = 12000,
+  burnIn = 2000,
+  verbose = TRUE
+)
+
+### Extract predictions
+yhatbgblup <- fitbgblup$yHat
+
+### Compute prediction accuracy
+
+bgblupoil<-cor(yhatbgblup[test_idx], oil_pheno$Oil[test_idx], use = "complete.obs")
+cor(yhatbgblup[test_idx], oil_pheno$Oil[test_idx], use = "complete.obs")
+```
+
+### Bayes B
+```{r}
+fit_bayesB <- BGLR(
+  y = y,
+  ETA = list(list(X = dosage, model = "BayesB")),
+  nIter = 12000,
+  burnIn = 2000,
+  
+)
+
+yhatbb <- fit_bayesB$yHat
+
+### Compute prediction accuracy
+
+bboil<-cor(yhatbb[test_idx], oil_pheno$Oil[test_idx], use = "complete.obs")
+cor(yhatbb[test_idx], oil_pheno$Oil[test_idx], use = "complete.obs")
+
+gebv_testoilbb <- fit_bayesB$yHat[test_idx]
+
+# get corresponding strain IDs
+strain_ids <- rownames(dosage)[test_idx]
+
+# combine into a data frame
+gebvs_oilbb <- data.frame(
+  Strain = strain_ids,
+  GEBV = gebv_testoilbb
+)
+
+##sort and extract top 10 stains with GEBVs
+
+library(dplyr)
+
+top10strainsoil <- gebvs_oilbb %>%
+  arrange(desc(GEBV)) %>%
+  slice(1:10)
+
+top10strainsoil
+```
+
+
+
+### Bayes Lasso
+```{r}
+fitbl <- BGLR(
+  y = y,
+  ETA = list(list(X = dosage, model = "BL")),  # Bayes Lasso
+  nIter = 12000,
+  burnIn = 2000
+)
+
+yhatbl <- fitbl$yHat
+
+### Compute prediction accuracy
+
+bloil<-cor(yhatbl[test_idx], oil_pheno$Oil[test_idx], use = "complete.obs")
+cor(yhatbl[test_idx], oil_pheno$Oil[test_idx], use = "complete.obs")
+```
+
+
+##Protein Models
+
+Downloaded, filtered, and cleaned our genotypic data to be used for oil.
+```{r}
+library(tidyverse)
+library(tidyr)
+library(lme4)
+
+snps<-read_delim(("C:/Users/otf0002/Downloads/SoyNAM parents+progeny 4312 SNP genotypes Wm82 (5).a2"),na = "-") %>% 
+  select(-dbSNP_ID,-Chr_Wm82.a2,-Position_Wm82.a2) %>% 
+  column_to_rownames(var = "DEPRECATED-BARCSOYNAMSNP6K_ID")
+dosage<-snps %>%
+  mutate(across(.cols=everything(),
+                ~ ifelse(.x=="A","0",
+                         ifelse(.x=="H","1",
+                                ifelse(.x=="B","2",.x))))) 
+sort(unique(unlist(snps)))
+sort(unique(unlist(dosage)))
+any(is.na(dosage))
+sum(is.na(dosage))
+
+# seems there are only 0,1,2 values and missing 
+# which is what we want
+
+dosage<-dosage %>% 
+  mutate(across(everything(),as.numeric)) %>% 
+  as.matrix %>% 
+  t()
+
+library(ASRgenomics)
+
+qc <- qc.filtering(M=dosage,
+                   maf         = 0.05, # keep markers with MAF >= 0.01
+                   marker.call = 0.95, # keep SNPs called in >= 95% of indivs
+                   ind.call    = 0.80, # keep individuals with >= 80% SNPs called
+                   imput       = TRUE) # simple mean imputation
+
+## Used code below to clean matrix to whole SNP values of 0, 1, or 2. The GS models seemed to work much better when this was done.
+
+
+geno <- qc$M[, -1]
+
+geno_mat <- as.matrix(qc$M)
+mode(geno_mat) <- "numeric"
+
+geno_mat <- round(geno_mat)
+geno_mat[geno_mat < 0] <- 0
+geno_mat[geno_mat > 2] <- 2
+
+
+all(is.na(geno_mat) | geno_mat %in% c(0,1,2))
+
+dosage<-geno_mat
+```
+
+### Phenotypic data and BLUE extraction
+Since we don't want to BLUP twice, we extracted BLUEs for each strain using asreml and Strain as a fixed effect.
+```{r}
+
+wholedata<-read.csv("~/Orrie/Class Materials/genomic proposal_files/trimmedpheno.csv" , na.strings = c(NA,"."))
+
+prot_pheno<-wholedata %>%
+  select(-Yld, -Oil) %>%
+  drop_na %>%
+  filter(Strain %in% rownames(dosage))
+
+dosage<-dosage[rownames(dosage) %in% prot_pheno$Strain,]
+
+prot_pheno<-prot_pheno %>% 
+  arrange(Env) %>% 
+  mutate(Env=factor(Env),
+         Strain=factor(Strain,levels=rownames(dosage)))
+
+
+library(asreml)
+
+asr_protblue<-asreml(Protein ~ Env + Strain ,
+                    residual = ~dsum(~units|Env),
+                    data = prot_pheno,
+                    maxiter = 15,
+                    workspace = "800mb")
+
+### Extract BLUEs
+
+protblues <- predict(asr_protblue, classify="Strain", workspace = "800mb", pworkspace = "2000mb")$pvals
+
+protblues<-protblues %>% rename(Protein = predicted.value) %>% select(-std.error, -status)
+
+prot_pheno<-protblues
+
+
+ggsnps_filt_centered<-scale(dosage,scale = F, center = T)
+
+
+library("sommer")
+
+prot_pheno<-prot_pheno %>% 
+  mutate(Strain=factor(Strain))
+```
+
+###Filtering and expanding marker matrix
+
+```{r}
+# Re-order the marker matrix to match genotype levels in the data
+M<-ggsnps_filt_centered[levels(prot_pheno$Strain),]
+
+##hard check
+all(rownames(M) == levels(prot_pheno$Strain))
+
+
+Z <- model.matrix(~ 0 + Strain, data = prot_pheno)
+
+# Make expanded marker matrix for observation-level RR-BLUP
+ZM <- Z %*% M
+```
+
+
+###GBLUP
+We then made a matrix, added a ridge, and ran a GBLUP model using asreml.
+```{r}
+### GBLUP
+
+Ap<-A.mat(dosage-1)
+
+summary(diag(Ap))
+
+dim(Ap)
+
+library(matrixcalc)
+
+##added ridge
+Ap<-Ap+diag(1e-6,nrow(Ap))
+is.positive.definite(Ap)
+
+prot_pheno<-prot_pheno %>% 
+  mutate(Strain=factor(Strain,levels=rownames(Ap)))
+
+fit_gblupp<-asreml(fixed     = Protein~1,
+                   random    = ~vm(Strain,Ap),
+                   data      = prot_pheno,
+                   maxiter = 15,
+                   workspace = "800mb")
+
+
+gblup <- summary(fit_gblupp, coef = TRUE)$coef.random
+
+gblup_df <- summary(fit_gblupp, coef = TRUE)$coef.random %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "Strain") %>%
+  mutate(Strain = sub("^vm\\(Strain, Ap\\)_", "", Strain)) %>%
+  rename(GEBV = solution)
+
+df <- merge(prot_pheno, gblup_df, by = "Strain")
+
+cor(df$Protein, df$GEBV, use = "complete.obs")
+```
+
+
+###Simple Data Split and 5 fold cross validation
+```{r}
+### single cross validation step to verify model runs
+
+protblups<-prot_pheno
+
+library(tidyverse)
+library(rsample)
+# First, let's set a few parameters
+## These will become input arguments to a function we will build
+seed<-123; # for repeatability
+nrepeats<-1 # number of iterations
+nfolds<-5 # number of folds for k-fold cross-validation
+strains<-unique(prot_pheno$Strain)
+blups<-prot_pheno
+trait<-"Protein"
+
+
+require(rsample)
+
+# Trick to make the whole set of cross validation repeatable
+# The input "seed" is a master "seed" that makes seeds for the rest of the process
+set.seed(seed); 
+seeds<-sample(1:10000,replace = F,size=nrepeats)
+
+# Make a list of training-testing splits spanning the number of iterations we want to do  
+cvsamples<-tibble(repeats=1:nrepeats,
+                  seeds=seeds)
+
+# For each repeat, us the `vfold_cv` function in rsample 
+#### to make train-test splits for k-fold cross-validation   
+cvsamples<-cvsamples %>% 
+  mutate(splits=map(seeds,function(seeds,...){
+    set.seed(seeds);
+    cvfolds<-vfold_cv(tibble(Strain=strains),v = nfolds)
+    return(cvfolds)}))
+
+cvsamples<-cvsamples %>% 
+  unnest(splits)
+
+# Watch what happens if we use the rsample functions "training()" and "testing()"
+training(cvsamples$splits[[1]])
+testing(cvsamples$splits[[1]])
+
+
+data<-blups
+splits<-cvsamples$splits[[1]]
+# --------------
+
+crossVal_onesplito <- function(splits, data, trait){
+  # Subset the data to training individuals only
+  # Use the training() rsample function 
+  trainingdata <- data %>%
+    dplyr::filter(Strain %in% training(splits)$Strain) %>%
+    dplyr::mutate(Strain = factor(Strain, levels = rownames(Ap)))
+  # We're doing a GBLUP model.
+  # You can set-up whatever you want though.
+  fit<-asreml(fixed     = as.formula(paste0(trait,"~1")),
+              random    = ~vm(Strain,Ap),
+              data      = trainingdata,
+              workspace = "800mb")
+  # Extract the GEBVs 
+  gpreds <-summary(fit, coef = TRUE)$coef.random %>%
+    as.data.frame() %>%
+    rownames_to_column(var = "Strain") %>%
+    dplyr::mutate(Strain = gsub("vm(Strain, Ap)_", "", Strain, fixed = T))
+  # Only the test-set's GEBVs are wanted for measuring accuracy
+  gpreds_testsetOnly <- gpreds %>%
+    filter(Strain %in% testing(splits)$Strain)
+  # return predictions for testset individuals
+  return(tibble(gpreds_testsetOnly = list(gpreds_testsetOnly)))
+}
+
+cvsamples<-cvsamples %>% 
+  mutate(CVresults=map(splits,~crossVal_onesplito(splits = ., 
+                                                  data=blups, trait=trait)))
+
+cvsamples<-cvsamples %>% 
+  dplyr::select(-splits) %>% 
+  unnest(CVresults) %>% 
+  unnest(gpreds_testsetOnly) %>% 
+  # merge the blups to the predictions
+  left_join(blups, by = "Strain")
+# Use group_by() + summarize() function to compute the cor(PRED,OBS) 
+#### seperately for each _iteration_ (repeat)
+accuracies<-cvsamples %>% 
+  dplyr::select(repeats,id,Strain,solution,trait) %>% 
+  group_by(repeats) %>% 
+  summarize(accuracy=cor(solution,get(trait),use='complete.obs'))
+
+accuracies
+
+```
+
+###Entire 10-fold cross validation function and results
+```{r}
+crossValo<-function(seed, nrepeats, nfolds, strains, blups, trait){
+  
+  require(rsample)
+  
+  # Trick for make the whole set of cross validation repeatable
+  # The input "seed" is a master "seed" that makes seeds for the rest of the process
+  set.seed(seed); 
+  seeds<-sample(1:10000,replace = F,size=nrepeats)
+  
+  # Make a list of training-testing splits spanning the number of iterations we want to do  
+  cvsamples<-tibble(repeats=1:nrepeats,
+                    seeds=seeds)
+  
+  # For each repeat, us the `vfold_cv` function in rsample 
+  #### to make train-test splits for k-fold cross-validation   
+  
+  cvsamples<-cvsamples %>% 
+    mutate(splits=map(seeds,function(seeds,...){
+      set.seed(seeds);
+      cvfolds<-vfold_cv(tibble(Strain=strains),v = nfolds)
+      return(cvfolds)}))
+  
+  cvsamples<-cvsamples %>% 
+    unnest(splits)
+  
+  
+  
+  crossVal_onesplit <- function(splits, data, trait){
+    # Subset the data to training individuals only
+    # Use the training() rsample function 
+    trainingdata <- data %>%
+      dplyr::filter(Strain %in% training(splits)$Strain) %>%
+      dplyr::mutate(Strain = factor(Strain, levels = rownames(Ap)))
+    # We're doing a GBLUP model.
+    # You can set-up whatever you want though.
+    fit<-asreml(fixed     = as.formula(paste0(trait,"~1")),
+                random    = ~vm(Strain,Ap),
+                data      = trainingdata,
+                workspace = "800mb")
+    # Extract the GEBVs 
+    gpreds <-summary(fit, coef = TRUE)$coef.random %>%
+      as.data.frame() %>%
+      rownames_to_column(var = "Strain") %>%
+      dplyr::mutate(Strain = gsub("vm(Strain, Ap)_", "", Strain, fixed = T))
+    # Only the test-set's GEBVs are wanted for measuring accuracy
+    gpreds_testsetOnly <- gpreds %>%
+      filter(Strain %in% testing(splits)$Strain)
+    # return predictions for testset individuals
+    return(tibble(gpreds_testsetOnly = list(gpreds_testsetOnly)))
+  }
+  
+  
+  cvsamples<-cvsamples %>% 
+    mutate(CVresults=map(splits,~crossVal_onesplit(splits = ., 
+                                                   data=blups, trait=trait)))
+  
+  cvsamples<-cvsamples %>% 
+    dplyr::select(-splits) %>% 
+    unnest(CVresults) %>% 
+    unnest(gpreds_testsetOnly) %>% 
+    # merge the blups to the predictions
+    left_join(blups, by = "Strain")
+  # Use group_by() + summarize() function to compute the cor(PRED,OBS) 
+  #### seperately for each _iteration_ (repeat)
+  accuracies<-cvsamples %>% 
+    dplyr::select(repeats,id,Strain,solution,trait) %>% 
+    group_by(repeats) %>% 
+    summarize(accuracy=cor(solution,get(trait),use='complete.obs'))
+  
+  return(accuracies)
+  
+}
+
+cvresults<-crossValo(seed=123,nrepeats=3, nfolds=10, 
+                     strains=unique(protblups$Strain), blups=protblups, trait="Protein")
+
+cvresults
+
+```
+
+
+### Bayesian Models Using BGLR
+Finally, we wanted to test multiple Bayesian models to determine which gave the highest prediction accuracy for our data set.
+```{r}
+## data splitting and cleaning
+strains<-unique(as.character(prot_pheno$Strain))
+set.seed(123);
+test_strainsp<-sample(strains,size = 0.2*length(strains),replace = F)
+train_strainsp<-strains[!strains %in% test_strainsp]
+
+prot_pheno$Strain <- as.character(prot_pheno$Strain)
+
+# Keep only strains with genotypes
+common_ids <- intersect(prot_pheno$Strain, rownames(dosage))
+
+#Make sure aligned
+prot_pheno <- prot_pheno[prot_pheno$Strain %in% common_ids, ]
+dosage <- dosage[common_ids, ]
+
+##Reorder genotype matrix to match phenotype
+dosage <- dosage[prot_pheno$Strain, ]
+
+## Create train/test index
+train_idx <- which(prot_pheno$Strain %in% train_strainsp)
+test_idx  <- which(prot_pheno$Strain %in% test_strainsp)
+
+### Mask test set
+y <- prot_pheno$Protein
+y[test_idx] <- NA   # THIS is key for BGLR
+
+library(BGLR)
+
+# Build genomic relationship matrix
+Z <- scale(dosage, center = TRUE, scale = FALSE)
+G <- tcrossprod(Z) / ncol(Z)
+```
+
+### Bayes GBLUP
+```{r}
+fitbgblup <- BGLR(
+  y = y,
+  ETA = list(list(K = G, model = "RKHS")),  # GBLUP via kernel
+  nIter = 12000,
+  burnIn = 2000,
+  verbose = TRUE
+)
+
+### Extract predictions
+yhatbgblup <- fitbgblup$yHat
+
+### Compute prediction accuracy
+
+bgblupprot<-cor(yhatbgblup[test_idx], prot_pheno$Protein[test_idx], use = "complete.obs")
+bgblupprot
+```
+
+### Bayes B
+```{r}
+fit_bayesB <- BGLR(
+  y = y,
+  ETA = list(list(X = dosage, model = "BayesB")),
+  nIter = 12000,
+  burnIn = 2000,
+  
+)
+
+yhatbb <- fit_bayesB$yHat
+
+### Compute prediction accuracy
+
+bbprot<-cor(yhatbb[test_idx], prot_pheno$Protein[test_idx], use = "complete.obs")
+bbprot
+```
+
+
+
+### Bayes Lasso
+```{r}
+fitbl <- BGLR(
+  y = y,
+  ETA = list(list(X = dosage, model = "BL")),  # Bayes Lasso
+  nIter = 12000,
+  burnIn = 2000
+)
+
+yhatbl <- fitbl$yHat
+
+### Compute prediction accuracy
+
+blprot<-cor(yhatbl[test_idx], prot_pheno$Protein[test_idx], use = "complete.obs")
+blprot
+
+gebv_testprotbl <- fitbl$yHat[test_idx]
+
+# get corresponding strain IDs
+strain_ids <- rownames(dosage)[test_idx]
+
+# combine into a data frame
+gebvs_protbl <- data.frame(
+  Strain = strain_ids,
+  GEBV = gebv_testprotbl
+)
+
+##sort and extract top 10 stains with GEBVs
+
+library(dplyr)
+
+top10strainsprot <- gebvs_protbl %>%
+  arrange(desc(GEBV)) %>%
+  slice(1:10)
+
+top10strainsprot
+
+```
+
+##GS Results Sumary
+
+The models used for genomic prediction of oil and protein had a significantly higher prediction accuracy than those for yield. For oil, BayesB had the highest accuracy out of the four models tested which was 0.684. For protein, Bayes Lasso was the best prediction model with an accuracy of 0.651. The high prediction accuracy obtained by these models suggests that they can be incorporated into a breeding pipeline to make selections based on genotypic markers and predicted GEBVs.This could help breeders make genetic gain more quickly and could help select individual that have high GEBVs for both oil and yield. Selection and breeding of those individuals could help reduce the negative correlation between oil and protein levels in soybean.
+
+The models predicting soybean yield had the lowest prediction accuracy out of the three traits analyzed. The BayesB model produced the highest prediction accuracy for yield out of the four models tested, which was 0.384. This level of accuracy is probably not quite high enough to incorporate into a breeding pipeline; however, increasing the amount of genotypic data for each line via 50k SNP chips could help improve the prediction accuracy to a more useful level.
+
+The lower prediction accuracy for yield is expected because the heritability for yield was lower than oil and protein, and environmental factors typically have a large impact on yield. This means that prediction based solely on genotypic data and GEBVs should be lower for yield.
+
+## Concluding Remarks
+Overall, we found that GWAS and GS could both be implemented successfully in the SoyNAM data sets. In our GWAS analysis, we were able to find SNPs that were significant across multiple models in GAPIT for yield and protein. These SNPs can be incorporated in MAS or GS to help make greater genetic gains in these important traits. The GS models for oil and protein has high prediction accuracy which suggests their utility in future breeding and selection pipelines. 
