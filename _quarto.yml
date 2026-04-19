@@ -1,0 +1,13 @@
+project:
+  type: website
+
+website:
+  title: "Soybean GWAS Project"
+  navbar:
+    left:
+      - href: quarto/GWAS_Project_Final_Report_Ayodele_Orrie (1).qmd
+        text: "Final Report"
+
+format:
+  html:
+    theme: cosmo

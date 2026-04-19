@@ -40,8 +40,9 @@ Phenotypic data were imported from the raw text file and cleaned prior to downst
 
 ```{r}
 # Load phenotype data
-pheno_file <- "../raw_data/phenotypic_data.txt"
-pheno_raw <- read.table(pheno_file, header = TRUE)
+library(here)
+
+pheno_file <- here("raw_data", "phenotypic_data.txt")
 
 pheno_raw <- read.table(
   pheno_file,
@@ -50,6 +51,7 @@ pheno_raw <- read.table(
   fill = TRUE,
   quote = "",
   comment.char = "",
+  na.strings = c(".", "", "NA"),
   stringsAsFactors = FALSE,
   check.names = FALSE
 )

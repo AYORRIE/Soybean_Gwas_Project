@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Ayodele Amodu">
+<meta name="author" content="Orrie Feitsma">
+
+<title>Genetic architecture, heritability, and genomic prediction of yield, seed protein, and oil content in soybean using multi-environment field data – Soybean GWAS Project</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-a0f9fd0d421825b736dc1bbcbcba2219.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Soybean GWAS Project</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../quarto/GWAS_Project_Final_Report_Ayodele_Orrie (1).html" aria-current="page"> 
+<span class="menu-text">Final Report</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#abstract" id="toc-abstract" class="nav-link active" data-scroll-target="#abstract">Abstract</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction">Introduction</a>
+  <ul class="collapse">
+  <li><a href="#data-sources-and-type" id="toc-data-sources-and-type" class="nav-link" data-scroll-target="#data-sources-and-type">Data sources and type</a></li>
+  <li><a href="#data-wrangling" id="toc-data-wrangling" class="nav-link" data-scroll-target="#data-wrangling">Data wrangling</a></li>
+  <li><a href="#summary-of-the-cleaned-phenotype-dataset" id="toc-summary-of-the-cleaned-phenotype-dataset" class="nav-link" data-scroll-target="#summary-of-the-cleaned-phenotype-dataset">Summary of the cleaned phenotype dataset</a></li>
+  <li><a href="#data-exploration" id="toc-data-exploration" class="nav-link" data-scroll-target="#data-exploration">Data exploration</a></li>
+  </ul></li>
+  <li><a href="#summary-of-exploratory-findings" id="toc-summary-of-exploratory-findings" class="nav-link" data-scroll-target="#summary-of-exploratory-findings">Summary of exploratory findings</a></li>
+  <li><a href="#variance-decomposition-and-heritability" id="toc-variance-decomposition-and-heritability" class="nav-link" data-scroll-target="#variance-decomposition-and-heritability">Variance decomposition and heritability</a></li>
+  <li><a href="#summary-of-variance-and-heritability-results" id="toc-summary-of-variance-and-heritability-results" class="nav-link" data-scroll-target="#summary-of-variance-and-heritability-results">Summary of variance and heritability results</a></li>
+  <li><a href="#multienvironment-blup-estimation" id="toc-multienvironment-blup-estimation" class="nav-link" data-scroll-target="#multienvironment-blup-estimation">Multi‑environment BLUP Estimation</a>
+  <ul class="collapse">
+  <li><a href="#prepare-phenotype-factors" id="toc-prepare-phenotype-factors" class="nav-link" data-scroll-target="#prepare-phenotype-factors">Prepare phenotype factors</a></li>
+  <li><a href="#yield-blups" id="toc-yield-blups" class="nav-link" data-scroll-target="#yield-blups">Yield BLUPs</a></li>
+  </ul></li>
+  <li><a href="#protein-blups" id="toc-protein-blups" class="nav-link" data-scroll-target="#protein-blups">Protein BLUPs</a></li>
+  <li><a href="#oil-blups" id="toc-oil-blups" class="nav-link" data-scroll-target="#oil-blups">Oil BLUPs</a></li>
+  <li><a href="#blup-summary-table" id="toc-blup-summary-table" class="nav-link" data-scroll-target="#blup-summary-table">BLUP Summary Table</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Genetic architecture, heritability, and genomic prediction of yield, seed protein, and oil content in soybean using multi-environment field data</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Authors</div>
+    <div class="quarto-title-meta-contents">
+             <p>Ayodele Amodu </p>
+             <p>Orrie Feitsma </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="abstract" class="level2">
+<h2 class="anchored" data-anchor-id="abstract">Abstract</h2>
+<p><em>This section will summarize the study’s objectives, data sources, analytical framework, key findings, and overall significance. A full abstract will be added after the main analyses and results are finalized.</em></p>
+</section>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Improving yield, seed protein, and oil content remain a central challenge in soybean breeding because these traits are economically critical yet genetically complex. Yield is highly polygenic and strongly influenced by environmental variation <span class="citation" data-cites="Sharma2024">Sharma et al. (<a href="#ref-Sharma2024" role="doc-biblioref">2024</a>)</span>, while protein and oil content often exhibit antagonistic genetic correlations <span class="citation" data-cites="Diers2018">Diers et al. (<a href="#ref-Diers2018" role="doc-biblioref">2018</a>)</span>, making simultaneous improvement difficult. Breeders must also contend with genotype × environment interactions (G×E), which cause genotypes to perform inconsistently across locations and years, reducing the reliability of selection decisions <span class="citation" data-cites="Akram2016">Akram et al. (<a href="#ref-Akram2016" role="doc-biblioref">2016</a>)</span>. Traditional phenotypic selection is further constrained by the cost and time required to generate multi-environment field data, as well as the limited ability to dissect the underlying genetic architecture of these traits.</p>
+<p>Although phenotypic selection alone is time consuming and not maximally effective, accurate phenotyping is crucial for understanding the heritability and variance components of traits and for obtaining accurate results from genomic inferences and predictions. Heritability refers to the ability of a trait to be passed down from parent to progeny or the portion of total phenotypic variance that can be attributed to genotype. An accurate understanding of heritability is crucial for estimating a population’s response to selection and the potential genetic gain that can be expected <span class="citation" data-cites="Holland2003">Holland et al. (<a href="#ref-Holland2003" role="doc-biblioref">2003</a>)</span>. A higher heritability suggests that selection is simpler, and the trait is likely only controlled by one or a few genes, while low heritability is typically associated with complex, polygenic traits. The variance components involved in phenotypic variance and heritability, such as dominance and additive variance, can further be parsed apart, and linear mixed models are typically used for this.</p>
+<p>Advances in high-density SNP genotyping (e.g., SoySNP50K) and mixed model statistical frameworks now enable more precise estimation of genetic effects, partitioning of G×E, and prediction of breeding values using genome-wide markers (Ravelombola et al., 2021; Zhang et al., 2016). The genomic data acquired by SNP genotyping can be used for various downstream applications that allow breeders to make both large-scale inferences and powerful predictions. For example, SNP data and phenotypic data can be collected from a diverse population and analyzed in a genome-wide association study (GWAS), which allows researchers to identify SNPs in regions of the genome that are significantly associated with a trait of interest <span class="citation" data-cites="Clauw2025">Clauw et al. (<a href="#ref-Clauw2025" role="doc-biblioref">2025</a>)</span>. Genotypic and phenotypic data can also be used for genomic selection (GS), which involves building and training a model to predict breeding values of individuals based on a score at each SNP <span class="citation" data-cites="Escamilla2025">Escamilla et al. (<a href="#ref-Escamilla2025" role="doc-biblioref">2025</a>)</span>.</p>
+<p>By integrating multi-environment phenotypic data with genomic information, this project aims to characterize the genetic architecture of yield, protein, and oil content, quantify their heritability, and evaluate the potential of genomic prediction to accelerate selection for improved seed quality and productivity in soybean. We will infer variance components and heritability using phenotypic data, identify SNPs associated with oil, protein, and yield using GWAS, and predict the performance of progeny from a subset of lines in this data using a GS model.</p>
+<section id="data-sources-and-type" class="level3">
+<h3 class="anchored" data-anchor-id="data-sources-and-type">Data sources and type</h3>
+<p><strong>Genotypic data.</strong> Imputed genotypes of the 5,176 Nested Association Mapping (NAM) recombinant inbred lines (RILs), derived from 40 NAM parental genotypes and obtained using the SoySNP50K and SoyNAM6K assays, were used in this project. The SNP arrays were aligned to the Williams 82 reference genome assembly (Wm82.a2). The imputed genotype dataset is publicly available at <a href="https://data.soybase.org/Glycine/max/diversity/Wm82.gnm2.div.Song_NAM_2021a/">SoyBase</a>.</p>
+<p><strong>Phenotypic and metadata.</strong> Phenotypic data and associated metadata were obtained from the USDA Soybean Nested Association Mapping (SoyNAM) project, which provides large‑scale field evaluations of soybean lines across multiple locations and years to study complex agronomic and seed composition traits. The SoyNAM project resources are available at <a href="https://legacy.soybase.org/">SoyBase Legacy</a>.</p>
+</section>
+<section id="data-wrangling" class="level3">
+<h3 class="anchored" data-anchor-id="data-wrangling">Data wrangling</h3>
+<p>Phenotypic data were imported from the raw text file and cleaned prior to downstream analyses. Empty columns created by trailing delimiters were removed, and key agronomic traits (yield, protein, and oil) were converted to numeric format to ensure compatibility with statistical modeling. Basic structural checks were performed to confirm correct variable types and naming. Missing data patterns were quantified to assess trait completeness across environments, and descriptive summaries were generated to characterize the distribution and scale of each trait. These steps ensured that the phenotype dataset was properly formatted, internally consistent, and ready for exploratory analyses and mixed‑model variance component estimation.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load phenotype data</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>pheno_file <span class="ot">&lt;-</span> <span class="fu">here</span>(<span class="st">"raw_data"</span>, <span class="st">"phenotypic_data.txt"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>pheno_raw <span class="ot">&lt;-</span> <span class="fu">read.table</span>(</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  pheno_file,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">header =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">sep =</span> <span class="st">"</span><span class="sc">\t</span><span class="st">"</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">fill =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">quote =</span> <span class="st">""</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">comment.char =</span> <span class="st">""</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">na.strings =</span> <span class="fu">c</span>(<span class="st">"."</span>, <span class="st">""</span>, <span class="st">"NA"</span>),</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">check.names =</span> <span class="cn">FALSE</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove empty columns created by trailing tabs</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>pheno_raw <span class="ot">&lt;-</span> pheno_raw[, <span class="fu">colnames</span>(pheno_raw) <span class="sc">!=</span> <span class="st">""</span>]</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert key trait columns to numeric</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>pheno_raw<span class="sc">$</span><span class="st">`</span><span class="at">Yld (kg/ha)</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(pheno_raw<span class="sc">$</span><span class="st">`</span><span class="at">Yld (kg/ha)</span><span class="st">`</span>)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>pheno_raw<span class="sc">$</span>Protein       <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(pheno_raw<span class="sc">$</span>Protein)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>pheno_raw<span class="sc">$</span>Oil           <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(pheno_raw<span class="sc">$</span>Oil)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Check structure of key variables</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(pheno_raw[, <span class="fu">c</span>(<span class="st">"Corrected Strain"</span>, <span class="st">"Loc"</span>, <span class="st">"Year"</span>, <span class="st">"Env"</span>,</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"Yld (kg/ha)"</span>, <span class="st">"Protein"</span>, <span class="st">"Oil"</span>)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'data.frame':   73294 obs. of  7 variables:
+ $ Corrected Strain: chr  "IA3023" "LD04-11056" "LD04-13265" "U06-100052" ...
+ $ Loc             : chr  "IA Beavis" "IA Beavis" "IA Beavis" "IA Beavis" ...
+ $ Year            : int  2012 2012 2012 2012 2012 2012 2012 2012 2012 2012 ...
+ $ Env             : chr  "2012_IA" "2012_IA" "2012_IA" "2012_IA" ...
+ $ Yld (kg/ha)     : num  2159 3463 3167 2492 2502 ...
+ $ Protein         : num  32.1 31.9 32.8 35.4 32.1 ...
+ $ Oil             : num  19.9 20.3 19.1 18.5 20.1 ...</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Count missing values for each trait</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(<span class="fu">is.na</span>(pheno_raw[, <span class="fu">c</span>(<span class="st">"Yld (kg/ha)"</span>, <span class="st">"Protein"</span>, <span class="st">"Oil"</span>)]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Yld (kg/ha)     Protein         Oil 
+       6610       20590       20590 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Descriptive summary of traits</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(pheno_raw[, <span class="fu">c</span>(<span class="st">"Yld (kg/ha)"</span>, <span class="st">"Protein"</span>, <span class="st">"Oil"</span>)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Yld (kg/ha)        Protein           Oil       
+ Min.   : 322.8   Min.   :25.59   Min.   :12.99  
+ 1st Qu.:2896.3   1st Qu.:32.71   1st Qu.:19.03  
+ Median :3564.3   Median :33.76   Median :19.66  
+ Mean   :3707.7   Mean   :33.76   Mean   :19.72  
+ 3rd Qu.:4519.2   3rd Qu.:34.80   3rd Qu.:20.35  
+ Max.   :7735.0   Max.   :43.46   Max.   :23.44  
+ NA's   :6610     NA's   :20590   NA's   :20590  </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Count non-missing observations for each trait</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(<span class="sc">!</span><span class="fu">is.na</span>(pheno_raw[, <span class="fu">c</span>(<span class="st">"Yld (kg/ha)"</span>, <span class="st">"Protein"</span>, <span class="st">"Oil"</span>)]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Yld (kg/ha)     Protein         Oil 
+      66684       52704       52704 </code></pre>
+</div>
+</div>
+</section>
+<section id="summary-of-the-cleaned-phenotype-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="summary-of-the-cleaned-phenotype-dataset">Summary of the cleaned phenotype dataset</h3>
+<p>After initial cleaning, the phenotype dataset showed substantial differences in data availability across traits. Yield had 6,610 missing observations, while protein and oil each had 20,590 missing values. Correspondingly, yield retained 66,684 non‑missing observations, whereas protein and oil each had 52,704 observations, indicating that seed composition traits were measured together and less frequently than yield. Descriptive summaries of the three traits confirmed that all values were numeric and within expected agronomic ranges, and no malformed or empty columns remained after preprocessing. This cleaned dataset formed the basis for subsequent exploratory analyses and mixed‑model heritability estimation.</p>
+</section>
+<section id="data-exploration" class="level3">
+<h3 class="anchored" data-anchor-id="data-exploration">Data exploration</h3>
+<p>Exploratory analyses were conducted to characterize the distribution of observations across years, locations, and environments, and to evaluate how yield, protein, and oil varied across these factors. Counts of observations by year and location were used to assess data balance, and a single problematic record with a missing location was removed. The number of unique environments and strains was confirmed, and trait means were summarized across environments. Boxplots were generated to visualize trait variation and missingness patterns, revealing strong environmental influence on yield and more moderate variation for protein and oil, with several environments lacking seed composition measurements.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Observations by year</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(pheno_raw<span class="sc">$</span>Year)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+ 2011  2012  2013 
+ 6119 34069 33105 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Observations by location</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(pheno_raw<span class="sc">$</span>Loc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+   IA Beavis     IL Diers    IN Rainey KS Schapaugh     Michigan   MO_Shannon 
+       12248        15308        12248         7660          939         1929 
+   NE Specht      OH Mian    OH_McHale 
+       15307         3810         3844 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove rows with missing or blank location</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>pheno_raw <span class="ot">&lt;-</span> pheno_raw[<span class="sc">!</span>(pheno_raw<span class="sc">$</span>Loc <span class="sc">==</span> <span class="st">""</span> <span class="sc">|</span> <span class="fu">is.na</span>(pheno_raw<span class="sc">$</span>Loc)), ]</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(pheno_raw)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 73293    28</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Unique environments and strains</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_env =</span> <span class="fu">length</span>(<span class="fu">unique</span>(pheno_raw<span class="sc">$</span>Env)),</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_strain =</span> <span class="fu">length</span>(<span class="fu">unique</span>(pheno_raw<span class="sc">$</span><span class="st">`</span><span class="at">Corrected Strain</span><span class="st">`</span>))</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   n_env n_strain 
+      19     5219 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Environment distribution</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(pheno_raw<span class="sc">$</span>Env)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    2011_IL     2011_NE     2012_IA     2012_IL     2012_IN     2012_KS 
+       3060        3059        6124        6124        6124        3808 
+    2012_MI     2012_MO     2012_NE   2012_OHmc 2012_OHmian     2013_IA 
+        939         982        6124        1923        1921        6124 
+    2013_IL     2013_IN     2013_KS     2013_MO     2013_NE   2013_OHmc 
+       6124        6124        3852         947        6124        1921 
+2013_OHmian 
+       1889 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Yield variation across environments</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">aggregate</span>(<span class="st">`</span><span class="at">Yld (kg/ha)</span><span class="st">`</span> <span class="sc">~</span> Env, <span class="at">data =</span> pheno_raw, mean, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           Env Yld (kg/ha)
+1      2011_IL    2821.804
+2      2011_NE    5107.103
+3      2012_IA    2809.378
+4      2012_IL    3422.185
+5      2012_IN    4274.668
+6      2012_KS    3904.774
+7      2012_MI    2374.817
+8      2012_MO    3446.245
+9      2012_NE    4802.989
+10   2012_OHmc    3414.574
+11 2012_OHmian    2842.603
+12     2013_IA    2893.854
+13     2013_IL    3150.394
+14     2013_IN    5103.074
+15     2013_KS    2815.179
+16     2013_MO    4130.061
+17   2013_OHmc    3676.813
+18 2013_OHmian    4499.398</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Yield boxplot</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>yield_plot <span class="ot">&lt;-</span> pheno_raw[<span class="sc">!</span><span class="fu">is.na</span>(pheno_raw<span class="sc">$</span><span class="st">`</span><span class="at">Yld (kg/ha)</span><span class="st">`</span>), ]</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>env_order <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aggregate</span>(<span class="st">`</span><span class="at">Yld (kg/ha)</span><span class="st">`</span> <span class="sc">~</span> Env, <span class="at">data =</span> yield_plot, mean),</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  Env[<span class="fu">order</span>(<span class="st">`</span><span class="at">Yld (kg/ha)</span><span class="st">`</span>, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)]</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>yield_plot<span class="sc">$</span>Env <span class="ot">&lt;-</span> <span class="fu">factor</span>(yield_plot<span class="sc">$</span>Env, <span class="at">levels =</span> env_order)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(yield_plot, <span class="fu">aes</span>(<span class="at">x =</span> Env, <span class="at">y =</span> <span class="st">`</span><span class="at">Yld (kg/ha)</span><span class="st">`</span>, <span class="at">fill =</span> Env)) <span class="sc">+</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">outlier.size =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_summary</span>(<span class="at">fun =</span> mean, <span class="at">geom =</span> <span class="st">"point"</span>, <span class="at">shape =</span> <span class="dv">18</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_summary</span>(<span class="at">fun.data =</span> mean_se, <span class="at">geom =</span> <span class="st">"errorbar"</span>, <span class="at">width =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Yield Variation Across Environments"</span>,</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Environment"</span>,</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Yield (kg/ha)"</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">"none"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="GWAS_Project_Final_Report_Ayodele_Orrie--1-_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Protein variation across environments</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">aggregate</span>(Protein <span class="sc">~</span> Env, <span class="at">data =</span> pheno_raw, mean, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       Env  Protein
+1  2011_IL 32.68626
+2  2011_NE 33.84564
+3  2012_IA 33.04600
+4  2012_IL 32.92777
+5  2012_IN 34.58357
+6  2012_NE 34.71142
+7  2013_IA 33.19734
+8  2013_IL 32.52968
+9  2013_IN 34.18506
+10 2013_NE 35.15831</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Protein boxplot</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>all_env <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">unique</span>(pheno_raw<span class="sc">$</span>Env))</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>protein_plot <span class="ot">&lt;-</span> pheno_raw[<span class="sc">!</span><span class="fu">is.na</span>(pheno_raw<span class="sc">$</span>Protein), ]</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>protein_plot<span class="sc">$</span>Env <span class="ot">&lt;-</span> <span class="fu">factor</span>(protein_plot<span class="sc">$</span>Env, <span class="at">levels =</span> all_env)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(protein_plot, <span class="fu">aes</span>(<span class="at">x =</span> Env, <span class="at">y =</span> Protein, <span class="at">fill =</span> Env)) <span class="sc">+</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">outlier.size =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_summary</span>(<span class="at">fun =</span> mean, <span class="at">geom =</span> <span class="st">"point"</span>, <span class="at">shape =</span> <span class="dv">18</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_summary</span>(<span class="at">fun.data =</span> mean_se, <span class="at">geom =</span> <span class="st">"errorbar"</span>, <span class="at">width =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_discrete</span>(<span class="at">drop =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Protein Variation Across Environments"</span>,</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Environment"</span>,</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Protein (%)"</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">"none"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="GWAS_Project_Final_Report_Ayodele_Orrie--1-_files/figure-html/unnamed-chunk-2-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Oil variation across environments</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">aggregate</span>(Oil <span class="sc">~</span> Env, <span class="at">data =</span> pheno_raw, mean, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       Env      Oil
+1  2011_IL 20.46163
+2  2011_NE 19.25276
+3  2012_IA 19.17852
+4  2012_IL 20.13120
+5  2012_IN 19.31964
+6  2012_NE 18.89248
+7  2013_IA 19.20158
+8  2013_IL 21.12186
+9  2013_IN 19.89991
+10 2013_NE 19.67468</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Oil boxplot</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>oil_plot <span class="ot">&lt;-</span> pheno_raw[<span class="sc">!</span><span class="fu">is.na</span>(pheno_raw<span class="sc">$</span>Oil), ]</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>oil_plot<span class="sc">$</span>Env <span class="ot">&lt;-</span> <span class="fu">factor</span>(oil_plot<span class="sc">$</span>Env, <span class="at">levels =</span> all_env)</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(oil_plot, <span class="fu">aes</span>(<span class="at">x =</span> Env, <span class="at">y =</span> Oil, <span class="at">fill =</span> Env)) <span class="sc">+</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">outlier.size =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_summary</span>(<span class="at">fun =</span> mean, <span class="at">geom =</span> <span class="st">"point"</span>, <span class="at">shape =</span> <span class="dv">18</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_summary</span>(<span class="at">fun.data =</span> mean_se, <span class="at">geom =</span> <span class="st">"errorbar"</span>, <span class="at">width =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_discrete</span>(<span class="at">drop =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Oil Variation Across Environments"</span>,</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Environment"</span>,</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Oil (%)"</span></span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">"none"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="GWAS_Project_Final_Report_Ayodele_Orrie--1-_files/figure-html/unnamed-chunk-2-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="summary-of-exploratory-findings" class="level2">
+<h2 class="anchored" data-anchor-id="summary-of-exploratory-findings">Summary of exploratory findings</h2>
+<p>Observations were unevenly distributed across years, with 2012 and 2013 contributing the majority of measurements. Locations were also unbalanced, with Michigan having notably few observations. After removing one record with a missing location, the dataset contained 73,293 rows and 28 columns. Nineteen environments and 5,219 strains were represented. Yield showed strong environmental influence, while protein and oil exhibited more moderate variation and were missing entirely in several environments (e.g., 2012_KS, 2012_MI). These patterns highlight the unbalanced structure of the dataset and the differing environmental sensitivity of the three traits.</p>
+</section>
+<section id="variance-decomposition-and-heritability" class="level2">
+<h2 class="anchored" data-anchor-id="variance-decomposition-and-heritability">Variance decomposition and heritability</h2>
+<p>Variance components were estimated for yield, protein, and oil using linear mixed models with random effects for genotype, environment, and genotype‑by‑environment interaction (G×E). For each trait, the fitted model partitioned the total phenotypic variance into contributions from these components and the residual error. Proportional variance contributions were computed to compare the relative influence of genotype, environment, and G×E across traits. Broad‑sense heritability across environments was then estimated using variance components adjusted for the number of environments and total observations contributing to each trait.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lme4)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Yield model and raw variance components</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>yield_dat <span class="ot">&lt;-</span> pheno_raw[<span class="sc">!</span><span class="fu">is.na</span>(pheno_raw<span class="sc">$</span><span class="st">`</span><span class="at">Yld (kg/ha)</span><span class="st">`</span>), ]</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>mod_yield <span class="ot">&lt;-</span> <span class="fu">lmer</span>(</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Yld (kg/ha)</span><span class="st">`</span> <span class="sc">~</span> (<span class="dv">1</span><span class="sc">|</span><span class="st">`</span><span class="at">Corrected Strain</span><span class="st">`</span>) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>Env) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span><span class="st">`</span><span class="at">Corrected Strain</span><span class="st">`</span><span class="sc">:</span>Env),</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> yield_dat</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a><span class="fu">VarCorr</span>(mod_yield)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> Groups                 Name        Std.Dev.
+ `Corrected Strain`:Env (Intercept) 273.59  
+ Corrected Strain       (Intercept) 309.21  
+ Env                    (Intercept) 839.15  
+ Residual                           549.75  </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Proportion of variance for any trait</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>get_varprop <span class="ot">&lt;-</span> <span class="cf">function</span>(trait_name) {</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  dat <span class="ot">&lt;-</span> pheno_raw[<span class="sc">!</span><span class="fu">is.na</span>(pheno_raw[[trait_name]]), ]</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  form <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste0</span>(<span class="st">"`"</span>, trait_name, <span class="st">"` ~ (1|`Corrected Strain`) + (1|Env) + (1|`Corrected Strain`:Env)"</span>)</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  mod <span class="ot">&lt;-</span> <span class="fu">lmer</span>(form, <span class="at">data =</span> dat)</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>  vc <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">VarCorr</span>(mod))[, <span class="fu">c</span>(<span class="st">"grp"</span>, <span class="st">"vcov"</span>)]</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>  vc<span class="sc">$</span>grp[vc<span class="sc">$</span>grp <span class="sc">==</span> <span class="st">"Corrected Strain"</span>] <span class="ot">&lt;-</span> <span class="st">"Genotype"</span></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>  vc<span class="sc">$</span>grp[vc<span class="sc">$</span>grp <span class="sc">==</span> <span class="st">"Env"</span>] <span class="ot">&lt;-</span> <span class="st">"Environment"</span></span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>  vc<span class="sc">$</span>grp[vc<span class="sc">$</span>grp <span class="sc">==</span> <span class="st">"Corrected Strain:Env"</span>] <span class="ot">&lt;-</span> <span class="st">"GxE"</span></span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>  vc<span class="sc">$</span>grp[vc<span class="sc">$</span>grp <span class="sc">==</span> <span class="st">"Residual"</span>] <span class="ot">&lt;-</span> <span class="st">"Residual"</span></span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>  vc<span class="sc">$</span>Proportion <span class="ot">&lt;-</span> vc<span class="sc">$</span>vcov <span class="sc">/</span> <span class="fu">sum</span>(vc<span class="sc">$</span>vcov)</span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a>  vc<span class="sc">$</span>Trait <span class="ot">&lt;-</span> trait_name</span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a>  vc[, <span class="fu">c</span>(<span class="st">"Trait"</span>, <span class="st">"grp"</span>, <span class="st">"vcov"</span>, <span class="st">"Proportion"</span>)]</span>
+<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-25"><a href="#cb30-25" aria-hidden="true" tabindex="-1"></a>varprop_yield   <span class="ot">&lt;-</span> <span class="fu">get_varprop</span>(<span class="st">"Yld (kg/ha)"</span>)</span>
+<span id="cb30-26"><a href="#cb30-26" aria-hidden="true" tabindex="-1"></a>varprop_protein <span class="ot">&lt;-</span> <span class="fu">get_varprop</span>(<span class="st">"Protein"</span>)</span>
+<span id="cb30-27"><a href="#cb30-27" aria-hidden="true" tabindex="-1"></a>varprop_oil     <span class="ot">&lt;-</span> <span class="fu">get_varprop</span>(<span class="st">"Oil"</span>)</span>
+<span id="cb30-28"><a href="#cb30-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-29"><a href="#cb30-29" aria-hidden="true" tabindex="-1"></a>varprop_yield</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        Trait                    grp      vcov Proportion
+1 Yld (kg/ha) `Corrected Strain`:Env  74853.98 0.06360458
+2 Yld (kg/ha)               Genotype  95608.90 0.08124035
+3 Yld (kg/ha)            Environment 704172.74 0.59834638
+4 Yld (kg/ha)               Residual 302229.10 0.25680870</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>varprop_protein</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    Trait                    grp      vcov Proportion
+1 Protein `Corrected Strain`:Env 0.2120286 0.09487143
+2 Protein               Genotype 0.6712800 0.30036177
+3 Protein            Environment 0.8806187 0.39402958
+4 Protein               Residual 0.4709777 0.21073722</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>varprop_oil</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Trait                    grp       vcov Proportion
+1   Oil `Corrected Strain`:Env 0.08137358 0.08362463
+2   Oil               Genotype 0.25383072 0.26085247
+3   Oil            Environment 0.48439465 0.49779453
+4   Oil               Residual 0.15348255 0.15772836</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Rename columns for heritability function</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>pheno <span class="ot">&lt;-</span> pheno_raw</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(pheno)[<span class="fu">names</span>(pheno) <span class="sc">==</span> <span class="st">"Corrected Strain"</span>] <span class="ot">&lt;-</span> <span class="st">"Strain"</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(pheno)[<span class="fu">names</span>(pheno) <span class="sc">==</span> <span class="st">"Yld (kg/ha)"</span>]      <span class="ot">&lt;-</span> <span class="st">"Yld"</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Broad-sense heritability across environments</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>compute_H2 <span class="ot">&lt;-</span> <span class="cf">function</span>(trait_name) {</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>  dat <span class="ot">&lt;-</span> pheno[<span class="sc">!</span><span class="fu">is.na</span>(pheno[[trait_name]]), ]</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>  n_env <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">unique</span>(dat<span class="sc">$</span>Env))</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>  n_obs <span class="ot">&lt;-</span> <span class="fu">nrow</span>(dat)</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>  form <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste0</span>(trait_name, <span class="st">" ~ (1|Strain) + (1|Env) + (1|Strain:Env)"</span>)</span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>  mod <span class="ot">&lt;-</span> <span class="fu">lmer</span>(form, <span class="at">data =</span> dat)</span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>  vc <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">VarCorr</span>(mod))</span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>  sigma_g  <span class="ot">&lt;-</span> vc<span class="sc">$</span>vcov[vc<span class="sc">$</span>grp <span class="sc">==</span> <span class="st">"Strain"</span>]</span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>  sigma_ge <span class="ot">&lt;-</span> vc<span class="sc">$</span>vcov[vc<span class="sc">$</span>grp <span class="sc">==</span> <span class="st">"Strain:Env"</span>]</span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a>  sigma_e  <span class="ot">&lt;-</span> vc<span class="sc">$</span>vcov[vc<span class="sc">$</span>grp <span class="sc">==</span> <span class="st">"Residual"</span>]</span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>  H2 <span class="ot">&lt;-</span> sigma_g <span class="sc">/</span> (sigma_g <span class="sc">+</span> (sigma_ge <span class="sc">/</span> n_env) <span class="sc">+</span> (sigma_e <span class="sc">/</span> n_obs))</span>
+<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(</span>
+<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">Trait =</span> trait_name,</span>
+<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">H2 =</span> H2,</span>
+<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">sigma_g =</span> sigma_g,</span>
+<span id="cb36-32"><a href="#cb36-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">sigma_ge =</span> sigma_ge,</span>
+<span id="cb36-33"><a href="#cb36-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">sigma_e =</span> sigma_e,</span>
+<span id="cb36-34"><a href="#cb36-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_env =</span> n_env,</span>
+<span id="cb36-35"><a href="#cb36-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_obs =</span> n_obs</span>
+<span id="cb36-36"><a href="#cb36-36" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb36-37"><a href="#cb36-37" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb36-38"><a href="#cb36-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-39"><a href="#cb36-39" aria-hidden="true" tabindex="-1"></a>H2_yield   <span class="ot">&lt;-</span> <span class="fu">compute_H2</span>(<span class="st">"Yld"</span>)</span>
+<span id="cb36-40"><a href="#cb36-40" aria-hidden="true" tabindex="-1"></a>H2_protein <span class="ot">&lt;-</span> <span class="fu">compute_H2</span>(<span class="st">"Protein"</span>)</span>
+<span id="cb36-41"><a href="#cb36-41" aria-hidden="true" tabindex="-1"></a>H2_oil     <span class="ot">&lt;-</span> <span class="fu">compute_H2</span>(<span class="st">"Oil"</span>)</span>
+<span id="cb36-42"><a href="#cb36-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-43"><a href="#cb36-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-44"><a href="#cb36-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine variance proportions for all traits</span></span>
+<span id="cb36-45"><a href="#cb36-45" aria-hidden="true" tabindex="-1"></a>varprop_all <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb36-46"><a href="#cb36-46" aria-hidden="true" tabindex="-1"></a>  varprop_yield,</span>
+<span id="cb36-47"><a href="#cb36-47" aria-hidden="true" tabindex="-1"></a>  varprop_protein,</span>
+<span id="cb36-48"><a href="#cb36-48" aria-hidden="true" tabindex="-1"></a>  varprop_oil</span>
+<span id="cb36-49"><a href="#cb36-49" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb36-50"><a href="#cb36-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-51"><a href="#cb36-51" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean trait names for readability</span></span>
+<span id="cb36-52"><a href="#cb36-52" aria-hidden="true" tabindex="-1"></a>varprop_all<span class="sc">$</span>Trait <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">"Yld </span><span class="sc">\\</span><span class="st">(kg/ha</span><span class="sc">\\</span><span class="st">)"</span>, <span class="st">"Yield"</span>, varprop_all<span class="sc">$</span>Trait)</span>
+<span id="cb36-53"><a href="#cb36-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-54"><a href="#cb36-54" aria-hidden="true" tabindex="-1"></a><span class="co"># Create heritability summary table</span></span>
+<span id="cb36-55"><a href="#cb36-55" aria-hidden="true" tabindex="-1"></a>H2_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb36-56"><a href="#cb36-56" aria-hidden="true" tabindex="-1"></a>  <span class="at">Trait =</span> <span class="fu">c</span>(<span class="st">"Yield"</span>, <span class="st">"Protein"</span>, <span class="st">"Oil"</span>),</span>
+<span id="cb36-57"><a href="#cb36-57" aria-hidden="true" tabindex="-1"></a>  <span class="at">H2 =</span> <span class="fu">c</span>(H2_yield<span class="sc">$</span>H2, H2_protein<span class="sc">$</span>H2, H2_oil<span class="sc">$</span>H2)</span>
+<span id="cb36-58"><a href="#cb36-58" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb36-59"><a href="#cb36-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-60"><a href="#cb36-60" aria-hidden="true" tabindex="-1"></a><span class="co"># Merge variance proportions with heritability</span></span>
+<span id="cb36-61"><a href="#cb36-61" aria-hidden="true" tabindex="-1"></a>summary_table <span class="ot">&lt;-</span> <span class="fu">merge</span>(</span>
+<span id="cb36-62"><a href="#cb36-62" aria-hidden="true" tabindex="-1"></a>  varprop_all,</span>
+<span id="cb36-63"><a href="#cb36-63" aria-hidden="true" tabindex="-1"></a>  H2_table,</span>
+<span id="cb36-64"><a href="#cb36-64" aria-hidden="true" tabindex="-1"></a>  <span class="at">by =</span> <span class="st">"Trait"</span>,</span>
+<span id="cb36-65"><a href="#cb36-65" aria-hidden="true" tabindex="-1"></a>  <span class="at">all.x =</span> <span class="cn">TRUE</span></span>
+<span id="cb36-66"><a href="#cb36-66" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb36-67"><a href="#cb36-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-68"><a href="#cb36-68" aria-hidden="true" tabindex="-1"></a><span class="co"># Reorder columns</span></span>
+<span id="cb36-69"><a href="#cb36-69" aria-hidden="true" tabindex="-1"></a>summary_table <span class="ot">&lt;-</span> summary_table[, <span class="fu">c</span>(<span class="st">"Trait"</span>, <span class="st">"grp"</span>, <span class="st">"vcov"</span>, <span class="st">"Proportion"</span>, <span class="st">"H2"</span>)]</span>
+<span id="cb36-70"><a href="#cb36-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-71"><a href="#cb36-71" aria-hidden="true" tabindex="-1"></a><span class="co"># Display formatted table of the three traits</span></span>
+<span id="cb36-72"><a href="#cb36-72" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb36-73"><a href="#cb36-73" aria-hidden="true" tabindex="-1"></a>  summary_table,</span>
+<span id="cb36-74"><a href="#cb36-74" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">"Summary of Variance Components and Broad-Sense Heritability for Yield, Protein, and Oil"</span>,</span>
+<span id="cb36-75"><a href="#cb36-75" aria-hidden="true" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">3</span></span>
+<span id="cb36-76"><a href="#cb36-76" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Summary of Variance Components and Broad-Sense Heritability for Yield, Protein, and Oil</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Trait</th>
+<th style="text-align: left;">grp</th>
+<th style="text-align: right;">vcov</th>
+<th style="text-align: right;">Proportion</th>
+<th style="text-align: right;">H2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Oil</td>
+<td style="text-align: left;"><code>Corrected Strain</code>:Env</td>
+<td style="text-align: right;">0.081</td>
+<td style="text-align: right;">0.084</td>
+<td style="text-align: right;">0.969</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Oil</td>
+<td style="text-align: left;">Genotype</td>
+<td style="text-align: right;">0.254</td>
+<td style="text-align: right;">0.261</td>
+<td style="text-align: right;">0.969</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Oil</td>
+<td style="text-align: left;">Environment</td>
+<td style="text-align: right;">0.484</td>
+<td style="text-align: right;">0.498</td>
+<td style="text-align: right;">0.969</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Oil</td>
+<td style="text-align: left;">Residual</td>
+<td style="text-align: right;">0.153</td>
+<td style="text-align: right;">0.158</td>
+<td style="text-align: right;">0.969</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Protein</td>
+<td style="text-align: left;"><code>Corrected Strain</code>:Env</td>
+<td style="text-align: right;">0.212</td>
+<td style="text-align: right;">0.095</td>
+<td style="text-align: right;">0.969</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Protein</td>
+<td style="text-align: left;">Genotype</td>
+<td style="text-align: right;">0.671</td>
+<td style="text-align: right;">0.300</td>
+<td style="text-align: right;">0.969</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Protein</td>
+<td style="text-align: left;">Environment</td>
+<td style="text-align: right;">0.881</td>
+<td style="text-align: right;">0.394</td>
+<td style="text-align: right;">0.969</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Protein</td>
+<td style="text-align: left;">Residual</td>
+<td style="text-align: right;">0.471</td>
+<td style="text-align: right;">0.211</td>
+<td style="text-align: right;">0.969</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Yield</td>
+<td style="text-align: left;"><code>Corrected Strain</code>:Env</td>
+<td style="text-align: right;">74853.982</td>
+<td style="text-align: right;">0.064</td>
+<td style="text-align: right;">0.958</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Yield</td>
+<td style="text-align: left;">Genotype</td>
+<td style="text-align: right;">95608.900</td>
+<td style="text-align: right;">0.081</td>
+<td style="text-align: right;">0.958</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Yield</td>
+<td style="text-align: left;">Environment</td>
+<td style="text-align: right;">704172.739</td>
+<td style="text-align: right;">0.598</td>
+<td style="text-align: right;">0.958</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Yield</td>
+<td style="text-align: left;">Residual</td>
+<td style="text-align: right;">302229.095</td>
+<td style="text-align: right;">0.257</td>
+<td style="text-align: right;">0.958</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="summary-of-variance-and-heritability-results" class="level2">
+<h2 class="anchored" data-anchor-id="summary-of-variance-and-heritability-results">Summary of variance and heritability results</h2>
+<p>Variance decomposition showed that environment contributed the largest share of variance for yield, consistent with its strong environmental sensitivity. Protein and oil displayed smaller environmental variance and relatively larger genetic components, reflecting their greater stability across environments. G×E contributed moderately to all traits. Broad‑sense heritability estimates were high for all three traits, with H² ≈ 0.96 for yield and ≈ 0.97 for both protein and oil, indicating that despite environmental effects, the genetic signal remains strong and suitable for downstream GWAS and genomic prediction.</p>
+</section>
+<section id="multienvironment-blup-estimation" class="level1">
+<h1>Multi‑environment BLUP Estimation</h1>
+<p>This section extends the variance and heritability analysis by estimating genotype Best Linear Unbiased Predictors (BLUPs) for yield, protein, and oil across environments. These BLUPs represent shrinkage‑adjusted genotype performance and will serve as inputs for downstream genomic prediction and GWAS analyses.</p>
+<section id="prepare-phenotype-factors" class="level2">
+<h2 class="anchored" data-anchor-id="prepare-phenotype-factors">Prepare phenotype factors</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>pheno<span class="sc">$</span>Strain <span class="ot">&lt;-</span> <span class="fu">factor</span>(pheno<span class="sc">$</span>Strain)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>pheno<span class="sc">$</span>Env    <span class="ot">&lt;-</span> <span class="fu">factor</span>(pheno<span class="sc">$</span>Env)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="yield-blups" class="level2">
+<h2 class="anchored" data-anchor-id="yield-blups">Yield BLUPs</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lme4)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>mod_yld <span class="ot">&lt;-</span> <span class="fu">lmer</span>(</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  Yld <span class="sc">~</span> (<span class="dv">1</span><span class="sc">|</span>Strain) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>Env) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>Strain<span class="sc">:</span>Env),</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> pheno[<span class="sc">!</span><span class="fu">is.na</span>(pheno<span class="sc">$</span>Yld), ]</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>yld_blups <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">Strain   =</span> <span class="fu">rownames</span>(<span class="fu">ranef</span>(mod_yld)<span class="sc">$</span>Strain),</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">Yld_BLUP =</span> <span class="fu">ranef</span>(mod_yld)<span class="sc">$</span>Strain[, <span class="dv">1</span>]</span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(yld_blups)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       Strain   Yld_BLUP
+1   4J105-3-4  397.68624
+2  5M20-2-5-2   94.82926
+3 CL0J095-4-6  126.19242
+4 CL0J173-6-8  178.47703
+5  DS11-02003 -226.51792
+6  DS11-02005  167.07989</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="protein-blups" class="level1">
+<h1>Protein BLUPs</h1>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>mod_protein <span class="ot">&lt;-</span> <span class="fu">lmer</span>(</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  Protein <span class="sc">~</span> (<span class="dv">1</span><span class="sc">|</span>Strain) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>Env) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>Strain<span class="sc">:</span>Env),</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> pheno[<span class="sc">!</span><span class="fu">is.na</span>(pheno<span class="sc">$</span>Protein), ]</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>protein_blups <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">Strain        =</span> <span class="fu">rownames</span>(<span class="fu">ranef</span>(mod_protein)<span class="sc">$</span>Strain),</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">Protein_BLUP  =</span> <span class="fu">ranef</span>(mod_protein)<span class="sc">$</span>Strain[, <span class="dv">1</span>]</span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(protein_blups)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       Strain Protein_BLUP
+1   4J105-3-4   0.68339612
+2  5M20-2-5-2   1.73170193
+3 CL0J095-4-6   1.65558632
+4 CL0J173-6-8   1.69950211
+5  DS11-02003  -0.54438974
+6  DS11-02005   0.04830539</code></pre>
+</div>
+</div>
+</section>
+<section id="oil-blups" class="level1">
+<h1>Oil BLUPs</h1>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>mod_oil <span class="ot">&lt;-</span> <span class="fu">lmer</span>(</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  Oil <span class="sc">~</span> (<span class="dv">1</span><span class="sc">|</span>Strain) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>Env) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>Strain<span class="sc">:</span>Env),</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> pheno[<span class="sc">!</span><span class="fu">is.na</span>(pheno<span class="sc">$</span>Oil), ]</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>oil_blups <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">Strain     =</span> <span class="fu">rownames</span>(<span class="fu">ranef</span>(mod_oil)<span class="sc">$</span>Strain),</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">Oil_BLUP   =</span> <span class="fu">ranef</span>(mod_oil)<span class="sc">$</span>Strain[, <span class="dv">1</span>]</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(oil_blups)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       Strain    Oil_BLUP
+1   4J105-3-4 -0.06641331
+2  5M20-2-5-2 -1.03496441
+3 CL0J095-4-6 -0.54599286
+4 CL0J173-6-8 -0.63462050
+5  DS11-02003  0.39975807
+6  DS11-02005 -0.07437308</code></pre>
+</div>
+</div>
+</section>
+<section id="blup-summary-table" class="level1">
+<h1>BLUP Summary Table</h1>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Merge BLUPs into a single summary table</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>blup_summary <span class="ot">&lt;-</span> <span class="fu">Reduce</span>(</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(x, y) <span class="fu">merge</span>(x, y, <span class="at">by =</span> <span class="st">"Strain"</span>, <span class="at">all =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(yld_blups, protein_blups, oil_blups)</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the first rows</span></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(blup_summary)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       Strain   Yld_BLUP Protein_BLUP    Oil_BLUP
+1   4J105-3-4  397.68624   0.68339612 -0.06641331
+2  5M20-2-5-2   94.82926   1.73170193 -1.03496441
+3 CL0J095-4-6  126.19242   1.65558632 -0.54599286
+4 CL0J173-6-8  178.47703   1.69950211 -0.63462050
+5  DS11-02003 -226.51792  -0.54438974  0.39975807
+6  DS11-02005  167.07989   0.04830539 -0.07437308</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate formatted table of the three traits</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  blup_summary,</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">"Summary of genotype BLUPs for Yield, Protein, and Oil across environments"</span>,</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">3</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-Akram2016" class="csl-entry" role="listitem">
+Akram, S., B. N. Hussain, M. A. Al Bari, D. J. Burritt, and M. A. Hossain. 2016. <span>“Genetic Variability and Association Analysis of Soybean (Glycine Max (l.) Merrill) for Yield and Yield Attributing Traits.”</span> <em>Plant Gene and Trait</em> 7.
+</div>
+<div id="ref-Clauw2025" class="csl-entry" role="listitem">
+Clauw, Pieter, Thomas James Ellis, Hai-Jun Liu, and Eriko Sasaki. 2025. <span>“Beyond the Standard GWAS—a Guide for Plant Biologists.”</span> <em>Plant and Cell Physiology</em> 66 (4): 431–43.
+</div>
+<div id="ref-Diers2018" class="csl-entry" role="listitem">
+Diers, B. W., J. Specht, K. M. Rainey, et al. 2018. <span>“Genetic Architecture of Soybean Yield and Agronomic Traits.”</span> <em>G3: Genes, Genomes, Genetics</em> 8 (10): 3367–75.
+</div>
+<div id="ref-Escamilla2025" class="csl-entry" role="listitem">
+Escamilla, D. M., D. Li, K. L. Negus, et al. 2025. <span>“Genomic Selection: Essence, Applications, and Prospects.”</span> <em>Plant Genome</em> 2 (2): e70053. <a href="https://doi.org/10.1002/tpg2.70053">https://doi.org/10.1002/tpg2.70053</a>.
+</div>
+<div id="ref-Holland2003" class="csl-entry" role="listitem">
+Holland, J. B., W. E. Nyquist, and C. T. Cervantes-Martínez. 2003. <span>“Estimating and Interpreting Heritability for Plant Breeding: An Update.”</span> In <em>Plant Breeding Reviews</em>, edited by J. Janick, vol. 22.
+</div>
+<div id="ref-Sharma2024" class="csl-entry" role="listitem">
+Sharma, A., K. Saxena, N. K. Panwar, and K. P. Singh. 2024. <span>“Assessment of Polygenic Traits Association with Yield in Soybean Genotypes.”</span> <em>Journal of Advances in Biology &amp; Biotechnology</em> 27 (6): 693–701.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
